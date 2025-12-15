@@ -1,0 +1,3076 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa de Habitaciones · Krystal Grand</title>
+<style>
+    :root{
+    --bg: #0b141c;
+    --card: #111c26;
+    --header: #0f3550;
+
+    /* Paleta azul perlado + verde olivo perlado */
+    --border-soft: rgba(255,255,255,.16);
+    --txt: #f4f7ff;
+    --muted:#a9b6d3;
+}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        background:
+          radial-gradient(900px 500px at 10% 0%, rgba(31,151,168,.25), transparent 55%),
+          radial-gradient(900px 600px at 90% 10%, rgba(200,122,42,.25), transparent 60%),
+          var(--bg);
+        color:var(--txt);
+        padding:18px;
+    }
+    h1{
+        text-align:center;
+        margin-bottom:14px;
+        font-size:26px;
+        letter-spacing:.04em;
+    }
+    .sub{
+        text-align:center;
+        font-size:13px;
+        color:var(--muted);
+        margin-bottom:18px;
+    }
+    .layout{
+        display:flex;
+        gap:14px;
+        align-items:flex-start;
+        justify-content:center;
+        flex-wrap:wrap;
+    }
+    .torre{
+        background:var(--card);
+        border-radius:18px;
+        border:1px solid var(--border-soft);
+        min-width:360px;
+        padding-bottom:10px;
+        box-shadow:0 14px 30px rgba(0,0,0,.45);
+    }
+    .torre-header{
+        background:var(--header);
+        border-radius:18px 18px 0 0;
+        padding:10px 14px;
+        text-align:center;
+        font-weight:700;
+        font-size:18px;
+        letter-spacing:.05em;
+        text-transform:uppercase;
+    }
+    .torre-sub{
+        text-align:center;
+        font-size:11px;
+        color:var(--muted);
+        padding:4px 10px 8px;
+        border-bottom:1px dashed var(--border-soft);
+        min-height:26px;
+    }
+    .piso{
+        padding:10px 10px 4px;
+        border-bottom:1px dashed rgba(255,255,255,.09);
+    }
+    .piso:last-child{
+        border-bottom:none;
+    }
+    .piso-titulo{
+        font-size:13px;
+        font-weight:600;
+        margin-bottom:6px;
+        color:#d6e6ff;
+    }
+    .fila{
+        display:flex;
+        gap:6px;
+        flex-wrap:nowrap; /* corrido en una sola línea */
+    }
+    .hab{width:70px;
+        height:50px;
+        border-radius:10px;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        font-size:11px;
+        border:1px solid rgba(0,0,0,.18);
+        box-shadow:0 2px 4px rgba(0,0,0,.45);
+        flex:0 0 auto;
+        cursor:pointer;
+        border:none;
+        background:rgba(255,255,255,.06);
+        transition:transform .08s ease, box-shadow .15s ease, filter .15s ease;
+}
+    .kg{/* bed label only (color handled by semáforo) */}
+    .mt{/* bed label only (color handled by semáforo) */}
+
+    .num{font-weight:700;font-size:13px;line-height:1.1;}
+    .tipo{opacity:.9;margin-top:1px; font-size:11px;}
+
+    .placeholder{
+        padding:18px 12px 22px;
+        font-size:12px;
+        color:var(--muted);
+        text-align:center;
+    }
+
+    /* Ajustes SOLO para UNIQUE */
+    .torre.unique .hab{
+        width:58px;
+        height:44px;
+        border-radius:10px;
+    }
+    .torre.unique .num{ font-size:12px; }
+    .torre.unique .tipo{ font-size:10px; }
+
+    /* Cada piso en UNIQUE: 2 filas máximas, 18 columnas.
+       Los primeros 18 van arriba; el resto se va abajo empezando bajo el 1. */
+    .torre.unique .fila{
+        display:grid;
+        grid-template-columns: repeat(18, 58px);
+        grid-auto-flow: row;
+        gap:6px;
+        justify-content:start;
+        align-items:start;
+        overflow:hidden; /* evita que se salgan del contenedor */
+        max-width:100%;
+    }
+
+    /* Evitar que cualquier torre desborde visualmente */
+    .torre{ overflow:hidden; }
+
+
+    @media (max-width: 1200px){
+        .torre{ min-width: 340px; }
+        .torre.unique .fila{ grid-template-columns: repeat(12, 58px); } /* en pantallas chicas, compacta */
+    }
+
+
+    .contadores{
+        margin-top:6px;
+        font-size:12px;
+        color:#e6f0ff;
+        opacity:.9;
+    }
+
+
+    /* Encabezado */
+    .topbar{
+        max-width: 1400px;
+        margin: 0 auto 18px auto;
+        padding: 16px 18px;
+        border-radius: 18px;
+        border: 1px solid var(--border-soft);
+        background: linear-gradient(180deg, rgba(16,25,38,.92), rgba(16,25,38,.68));
+        box-shadow:0 14px 30px rgba(0,0,0,.45);
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:14px;
+        flex-wrap:wrap;
+    }
+    .brand-title{
+        font-weight:800;
+        letter-spacing:.04em;
+        font-size:22px;
+        line-height:1.1;
+    }
+    .brand-sub{
+        margin-top:4px;
+        font-size:13px;
+        color:var(--muted);
+        letter-spacing:.06em;
+        text-transform:uppercase;
+    }
+    .pill{
+        padding:8px 12px;
+        border-radius:999px;
+        border:1px solid rgba(255,255,255,.14);
+        background: rgba(7,16,25,.5);
+        font-size:12px;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        color:#e8f1ff;
+        white-space:nowrap;
+    }
+
+    /* Animación suave de entrada (discreta) */
+    .topbar{ animation: fadeInUp .55s ease-out both; }
+    @keyframes fadeInUp{
+        from{ opacity:0; transform: translateY(8px); }
+        to{ opacity:1; transform: translateY(0); }
+    }
+
+    /* Ajuste general */
+    body{ padding-top: 14px; }
+
+
+    .brand{
+        display:flex;
+        align-items:center;
+        gap:14px;
+    }
+    .brand-logo{
+        height:52px;
+        width:auto;
+        border-radius:10px;
+        object-fit:contain;
+        box-shadow:0 4px 10px rgba(0,0,0,.35);
+        background:#fff;
+        padding:4px;
+    }
+    .brand-text{
+        display:flex;
+        flex-direction:column;
+    }
+
+
+    /* Footer firma */
+    footer.firma{
+        max-width:1400px;
+        margin:28px auto 8px;
+        padding-top:14px;
+        border-top:1px solid rgba(255,255,255,.12);
+        text-align:center;
+        font-size:12px;
+        color:#a9b6d3;
+        line-height:1.5;
+    }
+
+
+.hab{
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.hab:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0,0,0,.35);
+    filter: brightness(1.08);
+}
+
+/* Tooltip (modo PULIDAS): status + fecha + notas */
+body[data-mode="PULIDAS"] .hab[data-tip]{ position: relative; }
+body[data-mode="PULIDAS"] .hab[data-tip]:hover::after{
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  transform: translate(-50%, -100%);
+  background: rgba(10, 14, 20, .96);
+  border: 1px solid rgba(255,255,255,.16);
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: 0 18px 36px rgba(0,0,0,.45);
+  color: rgba(255,255,255,.95);
+  white-space: pre-line;
+  font-size: 12px;
+  line-height: 1.25;
+  width: max-content;
+  max-width: 260px;
+  z-index: 80;
+  pointer-events: none;
+}
+body[data-mode="PULIDAS"] .hab[data-tip]:hover::before{
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: rgba(255,255,255,.16);
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+  pointer-events: none;
+}
+
+
+
+    .datetime{
+        font-size:12px;
+        color:#e6f0ff;
+        opacity:.85;
+        letter-spacing:.06em;
+        white-space:nowrap;
+    }
+
+
+    /* Fecha y hora – estilo destacado */
+    .datetime{
+        font-size:14px;
+        color:#eef4ff;
+        opacity:.95;
+        letter-spacing:.12em;
+        white-space:nowrap;
+        display:flex;
+        align-items:center;
+        gap:10px;
+        font-weight:600;
+        font-variant-numeric: tabular-nums;
+    }
+    .datetime .date{
+        font-size:13px;
+        opacity:.9;
+    }
+    .datetime .time{
+        font-size:18px;
+        font-weight:700;
+        letter-spacing:.08em;
+    }
+
+
+    /* Encabezado fijo (sticky) */
+    .topbar{
+        position: sticky;
+        top: 12px;
+        z-index: 999;
+        backdrop-filter: blur(10px);
+    }
+
+
+    .contenedor{
+        padding-top: 6px;
+    }
+
+
+    /* Habitaciones como botones */
+    .hab{
+        cursor:pointer;
+        border:none;
+        outline:none;
+    }
+    .hab:focus{
+        box-shadow: 0 0 0 3px rgba(95,168,211,.35), 0 10px 22px rgba(0,0,0,.35);
+    }
+
+    /* Modal inventario */
+    .modal-backdrop{
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.55);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding:18px;
+        z-index:2000;
+    }
+    .modal{
+        width:min(980px, 100%);
+        max-height: min(86vh, 900px);
+        overflow:auto;
+        border-radius:18px;
+        border:1px solid rgba(255,255,255,.14);
+        background: linear-gradient(180deg, rgba(16,25,38,.96), rgba(16,25,38,.88));
+        box-shadow: 0 22px 60px rgba(0,0,0,.6);
+        padding:18px 18px 14px;
+    }
+    .modal header{
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom:10px;
+    }
+    .modal h2{
+        margin:0;
+        font-size:18px;
+        letter-spacing:.02em;
+    }
+    .modal .subline{
+        margin-top:4px;
+        color: var(--muted);
+        font-size:12px;
+        letter-spacing:.06em;
+        text-transform:uppercase;
+    }
+    .close-btn{
+        border:none;
+        background:rgba(255,255,255,.08);
+        color:#fff;
+        border:1px solid rgba(255,255,255,.12);
+        border-radius:12px;
+        padding:8px 10px;
+        cursor:pointer;
+    }
+    .grid-2{
+        display:grid;
+        grid-template-columns: 1fr 1fr;
+        gap:12px;
+    }
+    @media (max-width: 860px){
+        .grid-2{ grid-template-columns:1fr; }
+    }
+    .card{
+        border:1px solid rgba(255,255,255,.12);
+        background: rgba(7,16,25,.35);
+        border-radius:16px;
+        padding:12px;
+    }
+    .card h3{
+        margin:0 0 10px 0;
+        font-size:13px;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        color:#eaf2ff;
+    }
+    .fields{
+        display:grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap:10px;
+    }
+    @media (max-width: 720px){
+        .fields{ grid-template-columns: repeat(2, 1fr); }
+    }
+    .field label{
+        display:block;
+        font-size:11px;
+        color: var(--muted);
+        margin-bottom:6px;
+        letter-spacing:.05em;
+        text-transform:uppercase;
+    }
+    .field input, .field select, .field textarea{
+        width:100%;
+        padding:10px 10px;
+        border-radius:12px;
+        border:1px solid rgba(255,255,255,.14);
+        background: rgba(0,0,0,.18);
+        color:#fff;
+        outline:none;
+        font-size:13px;
+    }
+    .field textarea{ min-height: 86px; resize: vertical; }
+    .quick{
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        margin:10px 0 12px;
+    }
+    .qbtn{
+        border:none;
+        border-radius:999px;
+        padding:9px 12px;
+        cursor:pointer;
+        font-size:12px;
+        letter-spacing:.06em;
+        text-transform:uppercase;
+        border:1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.08);
+        color:#fff;
+    }
+    .qbtn.active{
+        background: rgba(95,168,211,.25);
+        border-color: rgba(95,168,211,.45);
+    }
+    .actions{
+        display:flex;
+        justify-content:space-between;
+        gap:10px;
+        flex-wrap:wrap;
+        margin-top:10px;
+    }
+    .primary{
+        background: linear-gradient(180deg, rgba(95,168,211,.9), rgba(63,127,166,.9));
+        border:1px solid rgba(255,255,255,.18);
+        color:#06202e;
+        font-weight:800;
+    }
+    .secondary{
+        background: rgba(255,255,255,.08);
+        border:1px solid rgba(255,255,255,.12);
+        color:#fff;
+    }
+    .btn{
+        border:none;
+        border-radius:14px;
+        padding:10px 12px;
+        cursor:pointer;
+        font-size:13px;
+    }
+    .hint{
+        margin-top:10px;
+        font-size:12px;
+        color: var(--muted);
+        line-height:1.4;
+    }
+    .history{
+        margin-top:10px;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+    }
+    .hist-item{
+        border:1px solid rgba(255,255,255,.10);
+        background: rgba(0,0,0,.18);
+        border-radius:14px;
+        padding:10px;
+        font-size:12px;
+        color:#eaf2ff;
+    }
+    .hist-item .meta{
+        color: var(--muted);
+        font-size:11px;
+        margin-bottom:6px;
+    }
+    .toast{
+        position:fixed;
+        right:16px;
+        bottom:16px;
+        z-index:3000;
+        background: rgba(16,25,38,.96);
+        border:1px solid rgba(255,255,255,.14);
+        color:#fff;
+        padding:10px 12px;
+        border-radius:14px;
+        display:none;
+        max-width: min(420px, 92vw);
+        box-shadow: 0 16px 40px rgba(0,0,0,.55);
+        font-size:13px;
+    }
+
+
+    /* Tabs */
+    .tabs{
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        align-items:center;
+        justify-content:center;
+        padding:10px 0;
+    }
+    .tab{
+        border:none;
+        cursor:pointer;
+        padding:10px 14px;
+        border-radius:999px;
+        font-size:12px;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        background: rgba(255,255,255,.06);
+        color:#eaf2ff;
+        border:1px solid rgba(255,255,255,.12);
+        transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    }
+    .tab:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); }
+    .tab.active{
+        background: rgba(95,168,211,.20);
+        border-color: rgba(95,168,211,.40);
+        box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+    @media (max-width: 820px){
+        .tabs{ justify-content:flex-start; padding:10px 6px; }
+        .tab{ padding:9px 12px; }
+    }
+
+    /* Vistas */
+    .view{ display:none; }
+    .view.active{ display:block; }
+
+    /* Home dashboard */
+    .home{
+        padding: 16px;
+        max-width: 1300px;
+        margin: 0 auto;
+    }
+    .home-grid{
+        display:grid;
+        grid-template-columns: 1.25fr .75fr;
+        gap:14px;
+    }
+    @media (max-width: 980px){
+        .home-grid{ grid-template-columns:1fr; }
+    }
+    .home-card{
+        border:1px solid rgba(255,255,255,.12);
+        background: rgba(7,16,25,.35);
+        border-radius:18px;
+        padding:14px;
+        box-shadow: 0 18px 46px rgba(0,0,0,.35);
+    }
+    .home-card h2{
+        margin:0 0 8px 0;
+        font-size:16px;
+        letter-spacing:.04em;
+        text-transform:uppercase;
+    }
+    .kpis{
+        display:grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap:10px;
+        margin-top:10px;
+    }
+    @media (max-width: 780px){
+        .kpis{ grid-template-columns: repeat(2, 1fr); }
+    }
+    .kpi{
+        border:1px solid rgba(255,255,255,.10);
+        background: rgba(0,0,0,.18);
+        border-radius:16px;
+        padding:12px;
+    }
+    .kpi .label{
+        color: var(--muted);
+        font-size:11px;
+        letter-spacing:.09em;
+        text-transform:uppercase;
+    }
+    .kpi .val{
+        font-size:22px;
+        font-weight:900;
+        margin-top:6px;
+        letter-spacing:.02em;
+    }
+    .home-actions{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        margin-top:12px;
+    }
+    .home-btn{
+        border:none;
+        cursor:pointer;
+        border-radius:16px;
+        padding:12px 14px;
+        background: rgba(255,255,255,.07);
+        border:1px solid rgba(255,255,255,.12);
+        color:#fff;
+        font-size:13px;
+        letter-spacing:.04em;
+    }
+    .home-btn strong{ letter-spacing:.08em; text-transform:uppercase; font-size:12px; }
+    .home-btn:hover{ background: rgba(255,255,255,.10); }
+
+    /* Semáforo (por modo) aplicado en botones .hab */
+    .hab[data-sema="ROJO"]{background: linear-gradient(180deg, rgba(194,65,65,.95), rgba(132,30,30,.95)); color:#fff; box-shadow: inset 0 -2px 0 rgba(255,255,255,.18), 0 10px 18px rgba(0,0,0,.28);}
+    .hab[data-sema="AMARILLO"]{background: linear-gradient(180deg, rgba(245,190,74,.95), rgba(184,122,0,.95)); color:#1b1300; box-shadow: inset 0 -2px 0 rgba(255,255,255,.22), 0 10px 18px rgba(0,0,0,.24);}
+    .hab[data-sema="VERDE"]{background: linear-gradient(180deg, rgba(110,140,70,.95), rgba(59,84,42,.95)); color:#f5fff0; box-shadow: inset 0 -2px 0 rgba(255,255,255,.18), 0 10px 18px rgba(0,0,0,.24);}
+    /* ===== VISTAS: colores por tipo de cama (perlado) ===== */
+    body[data-mode="VISTAS"] .hab{ 
+      /* override semáforo visual en VISTAS */
+      box-shadow: inset 0 -2px 0 rgba(255,255,255,.18), 0 10px 18px rgba(0,0,0,.26);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    body[data-mode="VISTAS"] .hab.kg{
+      background: linear-gradient(180deg, rgba(130,206,242,.95), rgba(56,142,190,.92));
+    }
+    body[data-mode="VISTAS"] .hab.mt{
+      background: linear-gradient(180deg, rgba(170,214,146,.95), rgba(92,150,92,.92));
+    }
+    body[data-mode="VISTAS"] .hab .tipo{ opacity: .92; }
+    .firma .julu{
+      display:inline-block;
+      margin-top:2px;
+      letter-spacing:.18em;
+      font-weight:800;
+      opacity:.9;
+    }
+
+    .hab[data-sema="ROJO"] .num{ color: #ffecec; }
+    .hab[data-sema="AMARILLO"] .num{ color: #fff3d9; }
+    .hab[data-sema="VERDE"] .num{ color: #ebffe1; }
+
+    /* Badge sub-calificación */
+    .badge{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:6px 10px;
+        border-radius:999px;
+        font-size:11px;
+        letter-spacing:.08em;
+        text-transform:uppercase;
+        border:1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.07);
+        color:#fff;
+    }
+    .badge.good{ border-color: rgba(123,143,63,.45); background: rgba(123,143,63,.14); }
+    .badge.warn{ border-color: rgba(224,179,92,.45); background: rgba(224,179,92,.12); }
+    .badge.bad{ border-color: rgba(220,84,84,.45); background: rgba(220,84,84,.12); }
+
+
+.hab:not([data-sema]){background: linear-gradient(180deg, rgba(194,65,65,.95), rgba(132,30,30,.95)); color:#fff;}
+
+/* =========================
+   JOLLA: Panel lateral (bitácora/ocupación)
+   ========================= */
+#jollaSide{
+  display:none;
+  position:fixed;
+  right:18px;
+  top:110px; /* debajo del header fijo */
+  width:340px;
+  max-height: calc(100vh - 140px);
+  overflow:auto;
+  z-index: 9999;
+  background: rgba(10,18,28,.88);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 18px;
+  box-shadow: 0 16px 46px rgba(0,0,0,.45);
+  backdrop-filter: blur(10px);
+}
+body[data-mode="JOLLA"] #jollaSide{ display:block; }
+body[data-mode="JOLLA"] #viewMap{ padding-right: 380px; }
+
+#jollaSide .side-h{
+  padding:14px 14px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+#jollaSide .side-h .t{
+  font-weight:800;
+  letter-spacing:.4px;
+}
+#jollaSide .side-h .s{
+  opacity:.82;
+  font-size:12px;
+  margin-top:4px;
+}
+#jollaSide .side-b{
+  padding:12px 14px 14px;
+}
+.jolla-kpis{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:12px;
+}
+.jolla-kpi{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:10px 10px 9px;
+  background: rgba(255,255,255,.03);
+}
+.jolla-kpi .k{ font-size:11px; opacity:.8; text-transform:uppercase; letter-spacing:.6px;}
+.jolla-kpi .v{ font-size:22px; font-weight:900; margin-top:4px;}
+.jolla-editor{
+  margin-top:10px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:16px;
+  padding:12px;
+  background: rgba(255,255,255,.03);
+}
+.jolla-editor .row{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:8px;
+}
+.jolla-editor label{
+  font-size:12px;
+  opacity:.9;
+  min-width:92px;
+}
+.jolla-editor select{
+  flex:1;
+  padding:9px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.25);
+  color:#fff;
+}
+.jolla-editor .btnbar{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.jolla-editor .btn{
+  flex:1;
+  padding:10px 10px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+.jolla-editor .btn.primary{
+  background: linear-gradient(135deg, rgba(46,146,214,.55), rgba(122,189,255,.25));
+  border-color: rgba(160,220,255,.35);
+}
+.jolla-note{
+  margin-top:10px;
+  font-size:12px;
+  opacity:.78;
+  line-height:1.35;
+}
+.hab.jolla-flag{
+  position:relative;
+}
+.hab.jolla-flag::after{
+  content: attr(data-jolla);
+  position:absolute;
+  right:8px;
+  top:7px;
+  font-size:10px;
+  padding:2px 6px;
+  border-radius:999px;
+  background: rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.14);
+  opacity:.95;
+}
+
+
+/* =========================
+   PULIDAS: Panel lateral fijo
+   ========================= */
+#pulidasSide{
+  display:none;
+  position:fixed;
+  right:18px;
+  top:110px; /* debajo del header fijo */
+  width:380px;
+  max-height: calc(100vh - 140px);
+  overflow:auto;
+  z-index: 9998;
+  background: rgba(10,18,28,.90);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.45);
+  backdrop-filter: blur(10px);
+}
+
+body[data-mode="PULIDAS"] #pulidasSide{ display:block; }
+body[data-mode="PULIDAS"] #viewMap{ padding-right: 420px; }
+#pulidasSide .side-h{
+  padding:14px 14px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+#pulidasSide .side-h .t{ font-weight:900; letter-spacing:.6px; }
+#pulidasSide .side-h .s{ margin-top:4px; font-size:12px; color: var(--muted); line-height:1.35; }
+#pulidasSide .side-b{ padding:12px 14px 14px; display:flex; flex-direction:column; gap:12px; }
+#pulidasSide .kpis{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+#pulidasSide .kpi{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:10px 12px;
+  background: rgba(255,255,255,.04);
+}
+#pulidasSide .kpi .lbl{ font-size:11px; color: var(--muted); letter-spacing:.5px; text-transform:uppercase; }
+#pulidasSide .kpi .val{ font-size:22px; font-weight:900; margin-top:2px; }
+#pulidasSide .bar{
+  height:10px;
+  border-radius:999px;
+  background: rgba(255,255,255,.08);
+  overflow:hidden;
+  margin-top:8px;
+}
+#pulidasSide .bar > i{
+  display:block;
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background: linear-gradient(90deg, rgba(160,220,255,.95), rgba(180,220,170,.95));
+}
+#pulidasSide .row{ display:flex; gap:10px; align-items:center; }
+#pulidasSide label{ font-size:12px; color: var(--muted); }
+#pulidasSide input, #pulidasSide select, #pulidasSide textarea{
+  width:100%;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+  color: var(--text);
+  padding:10px 12px;
+  outline:none;
+}
+#pulidasSide textarea{ min-height:78px; resize:vertical; }
+#pulidasSide .btn{
+  width:100%;
+  border:none;
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:900;
+  cursor:pointer;
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+}
+#pulidasSide .btn.primary{ background: linear-gradient(135deg, rgba(130,210,255,.30), rgba(170,220,180,.25)); border:1px solid rgba(255,255,255,.14); }
+#pulidasSide .tbl{
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+#pulidasSide .tbl th{
+  text-align:left;
+  color: var(--muted);
+  font-weight:800;
+  padding:8px 6px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+#pulidasSide .tbl td{
+  padding:8px 6px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+#pulidasSide .chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+  font-weight:800;
+}
+#pulidasSide .mini{ font-size:11px; color: var(--muted); }
+/* Pulidas: marca visual cuando una habitación ya está pulida */
+body[data-mode="PULIDAS"] .hab.pulido-done{
+  background: linear-gradient(180deg, rgba(90, 180, 140, .95), rgba(40, 120, 95, .95));
+  border-color: rgba(170, 255, 220, .6);
+  box-shadow: 0 10px 26px rgba(40,120,95,.25), inset 0 0 0 1px rgba(255,255,255,.08);
+}
+body[data-mode="PULIDAS"] .hab.pulido-done::after{
+  content: "✓";
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-weight: 900;
+  font-size: 14px;
+  opacity: .95;
+  text-shadow: 0 2px 10px rgba(0,0,0,.35);
+}
+
+/* Tabla Pulidas: filas de resumen + enfoque */
+#pulidasSide .sum-row td{
+  background: rgba(255,255,255,.03);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  font-weight: 700;
+}
+#pulidasSide .sep-row td{
+  padding-top: 12px;
+  padding-bottom: 8px;
+  opacity: .9;
+}
+#pulidasSide .room-row td{
+  vertical-align: middle;
+}
+#pulidasSide .pill{
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  font-size: 12px;
+  opacity: .9;
+}
+#pulidasSide .row-focus td{
+  background: rgba(120, 200, 255, .10) !important;
+}
+
+/* Checklist view */
+.check-wrap{max-width:1200px;margin:0 auto;padding:18px 14px 24px;}
+.check-head{padding:14px 16px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:rgba(10,16,25,.55);backdrop-filter: blur(8px);box-shadow:0 10px 30px rgba(0,0,0,.25);}
+.check-head h2{margin:0 0 6px 0;letter-spacing:.4px}
+.check-actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+.check-frame{margin-top:14px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.25);min-height:70vh}
+.check-frame iframe{width:100%;height:70vh;border:0}
+
+/* Home pulidas mini */
+.home-mini{margin-top:14px;padding:12px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+.mini-title{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+.mini-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:rgba(255,255,255,.85)}
+.mini-row b{font-size:14px;color:#fff}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img class="brand-logo" src="https://res.cloudinary.com/dor6za85u/image/upload/v1765651460/Krystal_Grand_wo1rbs.jpg" alt="Krystal Grand Logo">
+    <div class="brand-text">
+      <div class="brand-title">Krystal Grand · División Cuartos</div>
+      <div class="brand-sub">Mapa Operativo de Habitaciones</div>
+    </div>
+  </div>
+    <nav class="tabs" aria-label="Secciones">
+      <button class="tab active" data-mode="HOME">Home</button>
+      <button class="tab" data-mode="CHECKLIST">Checklist</button>
+      <button class="tab" data-mode="PULIDAS">Pulidas</button>
+      <button class="tab" data-mode="MPLP">MP/LP</button>
+      <button class="tab" data-mode="VISTAS">Vistas</button>
+      <button class="tab" data-mode="JOLLA">Jolla</button>
+    </nav>
+
+
+  <div class="pill">ALTITUDE · PALMILLA · UNIQUE · JOLLA</div>
+  <div class="datetime"><span class="date"></span> · <span class="time"></span></div>
+</header>
+
+<section id="viewHome" class="view active">
+  <div class="home">
+    <div class="home-grid">
+      <div class="home-card">
+        <h2>Centro de Resumen</h2>
+        <div style="color:var(--muted);font-size:13px;line-height:1.5;">
+          Este <b>Home</b> resume el avance por módulo. Las pestañas no cambian el croquis: solo cambian el <b>contexto</b> y el <b>semáforo</b>.
+          <br>Regla actual: <b>todo inicia en ROJO</b> y se libera a AMARILLO / VERDE conforme se atiende y certifica.
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Total habitaciones</div><div class="val" id="kpiTotal">—</div></div>
+          <div class="kpi"><div class="label">Verdes</div><div class="val" id="kpiGreen">—</div></div>
+          <div class="kpi"><div class="label">Amarillos</div><div class="val" id="kpiYellow">—</div></div>
+          <div class="kpi"><div class="label">Rojos</div><div class="val" id="kpiRed">—</div></div>
+        </div>
+        <div class="home-mini">
+          <div class="mini-title">Pulidas · avance (consulta rápida)</div>
+          <div class="mini-grid">
+            <div class="mini-row"><span>General</span><b id="homePulOverall">0%</b></div>
+            <div class="mini-row"><span>Altitude</span><b id="homePulA">0%</b></div>
+            <div class="mini-row"><span>Palmilla</span><b id="homePulP">0%</b></div>
+            <div class="mini-row"><span>Unique</span><b id="homePulU">0%</b></div>
+          </div>
+        </div>
+        <div class="home-actions">
+          <button class="home-btn" data-go="PULIDAS"><strong>Pulidas</strong><br><span style="color:var(--muted);font-size:12px;">Checklist estético / detalle</span></button>
+          <button class="home-btn" data-go="MPLP"><strong>MP/LP</strong><br><span style="color:var(--muted);font-size:12px;">Profundas + preventivo</span></button>
+          <button class="home-btn" data-go="VISTAS"><strong>Vistas</strong><br><span style="color:var(--muted);font-size:12px;">Catálogo / atributos</span></button>
+          <button class="home-btn" data-go="JOLLA"><strong>Jolla</strong><br><span style="color:var(--muted);font-size:12px;">Seguimiento tipo Airbnb</span></button>
+        </div>
+      </div>
+      <div class="home-card">
+        <h2>Modo actual</h2>
+        <div class="badge bad" id="modeBadge">HOME</div>
+        <div style="margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5;">
+          En cualquier modo (excepto Home) verás el mismo croquis. El semáforo y la bitácora se guardan por habitación <b>y por módulo</b>.
+        </div>
+        <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,.10);padding-top:12px;color:var(--muted);font-size:12px;line-height:1.5;">
+          <b>Semáforo:</b> Verde = certificado / rentable · Amarillo = corregible rápido · Rojo = requiere atención/inversión.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="viewChecklist" class="view">
+  <div class="check-wrap">
+    <div class="check-head">
+      <h2>Checklist Camaristas</h2>
+      <div class="muted">Vista integrada del checklist operativo. Si no carga por el navegador, usa “Abrir en pestaña nueva”.</div>
+      <div class="check-actions">
+        <a class="btn secondary" href="https://hernaldluis.github.io/checklist-camaristas-krystal/" target="_blank" rel="noopener">Abrir en pestaña nueva</a>
+      </div>
+    </div>
+    <div class="check-frame">
+      <iframe src="https://hernaldluis.github.io/checklist-camaristas-krystal/" title="Checklist Camaristas Krystal"></iframe>
+    </div>
+  </div>
+</section>
+
+<section id="viewMap" class="view">
+<div class="layout">
+
+    <!-- TORRE 1 · ALTITUDE (NO TOCAR) -->
+    <section class="torre">
+        <div class="torre-header">Torre 1 · ALTITUDE</div>
+        <div class="torre-sub">
+        <div class="contadores">K: <span class="cnt-k">0</span> · M: <span class="cnt-m">0</span></div>
+Pisos 21 al 27</div>
+
+        <!-- Piso 27 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 27</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="2701" data-tipo="MT" data-bed="M"><div class="num">2701</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2702" data-tipo="KG" data-bed="K"><div class="num">2702</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2703" data-tipo="MT" data-bed="M"><div class="num">2703</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2704" data-tipo="KG" data-bed="K"><div class="num">2704</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2705" data-tipo="MT" data-bed="M"><div class="num">2705</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2706" data-tipo="KG" data-bed="K"><div class="num">2706</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2707" data-tipo="MT" data-bed="M"><div class="num">2707</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2708" data-tipo="KG" data-bed="K"><div class="num">2708</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2709" data-tipo="MT" data-bed="M"><div class="num">2709</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2710" data-tipo="KG" data-bed="K"><div class="num">2710</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 26 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 26</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="2601" data-tipo="MT" data-bed="M"><div class="num">2601</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2602" data-tipo="KG" data-bed="K"><div class="num">2602</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2603" data-tipo="MT" data-bed="M"><div class="num">2603</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2604" data-tipo="KG" data-bed="K"><div class="num">2604</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2605" data-tipo="MT" data-bed="M"><div class="num">2605</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2606" data-tipo="KG" data-bed="K"><div class="num">2606</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2607" data-tipo="MT" data-bed="M"><div class="num">2607</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2608" data-tipo="KG" data-bed="K"><div class="num">2608</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2609" data-tipo="MT" data-bed="M"><div class="num">2609</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2610" data-tipo="KG" data-bed="K"><div class="num">2610</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 25 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 25</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="2501" data-tipo="MT" data-bed="M"><div class="num">2501</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2502" data-tipo="KG" data-bed="K"><div class="num">2502</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2503" data-tipo="MT" data-bed="M"><div class="num">2503</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2504" data-tipo="KG" data-bed="K"><div class="num">2504</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2505" data-tipo="MT" data-bed="M"><div class="num">2505</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2506" data-tipo="KG" data-bed="K"><div class="num">2506</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2507" data-tipo="MT" data-bed="M"><div class="num">2507</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2508" data-tipo="KG" data-bed="K"><div class="num">2508</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2509" data-tipo="MT" data-bed="M"><div class="num">2509</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2510" data-tipo="KG" data-bed="K"><div class="num">2510</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 24 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 24</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="2401" data-tipo="MT" data-bed="M"><div class="num">2401</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2402" data-tipo="KG" data-bed="K"><div class="num">2402</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2403" data-tipo="MT" data-bed="M"><div class="num">2403</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2404" data-tipo="KG" data-bed="K"><div class="num">2404</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2405" data-tipo="MT" data-bed="M"><div class="num">2405</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2406" data-tipo="KG" data-bed="K"><div class="num">2406</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2407" data-tipo="MT" data-bed="M"><div class="num">2407</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2408" data-tipo="KG" data-bed="K"><div class="num">2408</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2409" data-tipo="MT" data-bed="M"><div class="num">2409</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2410" data-tipo="KG" data-bed="K"><div class="num">2410</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 23 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 23</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="2301" data-tipo="MT" data-bed="M"><div class="num">2301</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2302" data-tipo="KG" data-bed="K"><div class="num">2302</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2303" data-tipo="MT" data-bed="M"><div class="num">2303</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2304" data-tipo="KG" data-bed="K"><div class="num">2304</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2305" data-tipo="MT" data-bed="M"><div class="num">2305</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2306" data-tipo="KG" data-bed="K"><div class="num">2306</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2307" data-tipo="MT" data-bed="M"><div class="num">2307</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2308" data-tipo="KG" data-bed="K"><div class="num">2308</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2309" data-tipo="MT" data-bed="M"><div class="num">2309</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2310" data-tipo="KG" data-bed="K"><div class="num">2310</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 22 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 22</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="2201" data-tipo="MT" data-bed="M"><div class="num">2201</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2202" data-tipo="KG" data-bed="K"><div class="num">2202</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2203" data-tipo="MT" data-bed="M"><div class="num">2203</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2204" data-tipo="KG" data-bed="K"><div class="num">2204</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2205" data-tipo="MT" data-bed="M"><div class="num">2205</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2206" data-tipo="KG" data-bed="K"><div class="num">2206</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2207" data-tipo="MT" data-bed="M"><div class="num">2207</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2208" data-tipo="KG" data-bed="K"><div class="num">2208</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2209" data-tipo="MT" data-bed="M"><div class="num">2209</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2210" data-tipo="KG" data-bed="K"><div class="num">2210</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 21 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 21</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="2101" data-tipo="MT" data-bed="M"><div class="num">2101</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2102" data-tipo="KG" data-bed="K"><div class="num">2102</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2103" data-tipo="MT" data-bed="M"><div class="num">2103</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2104" data-tipo="KG" data-bed="K"><div class="num">2104</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2105" data-tipo="MT" data-bed="M"><div class="num">2105</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2106" data-tipo="KG" data-bed="K"><div class="num">2106</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="2107" data-tipo="MT" data-bed="M"><div class="num">2107</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="2108" data-tipo="KG" data-bed="K"><div class="num">2108</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- TORRE 2 · PALMILLA -->
+    <section class="torre">
+        <div class="torre-header">Torre 2 · PALMILLA</div>
+        <div class="torre-sub">
+        <div class="contadores">K: <span class="cnt-k">0</span> · M: <span class="cnt-m">0</span></div>
+Pisos 11 al 16</div>
+
+        <!-- Piso 16 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 16</div>
+            <div class="fila">
+                <button type="button" class="hab kg" data-room="1601A" data-tipo="KG" data-bed="K"><div class="num">1601A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1601B" data-tipo="MT" data-bed="M"><div class="num">1601B</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1602" data-tipo="KG" data-bed="K"><div class="num">1602</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1603A" data-tipo="KG" data-bed="K"><div class="num">1603A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1603B" data-tipo="MT" data-bed="M"><div class="num">1603B</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1604" data-tipo="KG" data-bed="K"><div class="num">1604</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1605A" data-tipo="MT" data-bed="M"><div class="num">1605A</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="1605B" data-tipo="MT" data-bed="M"><div class="num">1605B</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 15 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 15</div>
+            <div class="fila">
+                <button type="button" class="hab kg" data-room="1501A" data-tipo="KG" data-bed="K"><div class="num">1501A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1501B" data-tipo="KG" data-bed="K"><div class="num">1501B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1502" data-tipo="MT" data-bed="M"><div class="num">1502</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1503A" data-tipo="KG" data-bed="K"><div class="num">1503A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1503B" data-tipo="KG" data-bed="K"><div class="num">1503B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1504" data-tipo="MT" data-bed="M"><div class="num">1504</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1505A" data-tipo="KG" data-bed="K"><div class="num">1505A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1505B" data-tipo="KG" data-bed="K"><div class="num">1505B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1506" data-tipo="MT" data-bed="M"><div class="num">1506</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1507A" data-tipo="KG" data-bed="K"><div class="num">1507A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1507B" data-tipo="MT" data-bed="M"><div class="num">1507B</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 14 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 14</div>
+            <div class="fila">
+                <button type="button" class="hab kg" data-room="1401A" data-tipo="KG" data-bed="K"><div class="num">1401A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1401B" data-tipo="KG" data-bed="K"><div class="num">1401B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1402" data-tipo="MT" data-bed="M"><div class="num">1402</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1403A" data-tipo="KG" data-bed="K"><div class="num">1403A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1403B" data-tipo="KG" data-bed="K"><div class="num">1403B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1404" data-tipo="MT" data-bed="M"><div class="num">1404</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1405A" data-tipo="KG" data-bed="K"><div class="num">1405A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1405B" data-tipo="KG" data-bed="K"><div class="num">1405B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1406" data-tipo="MT" data-bed="M"><div class="num">1406</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1407A" data-tipo="KG" data-bed="K"><div class="num">1407A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1407B" data-tipo="MT" data-bed="M"><div class="num">1407B</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 13 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 13</div>
+            <div class="fila">
+                <button type="button" class="hab kg" data-room="1301A" data-tipo="KG" data-bed="K"><div class="num">1301A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1301B" data-tipo="KG" data-bed="K"><div class="num">1301B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1302" data-tipo="MT" data-bed="M"><div class="num">1302</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1303A" data-tipo="KG" data-bed="K"><div class="num">1303A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1303B" data-tipo="KG" data-bed="K"><div class="num">1303B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1304" data-tipo="MT" data-bed="M"><div class="num">1304</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1305A" data-tipo="KG" data-bed="K"><div class="num">1305A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1305B" data-tipo="KG" data-bed="K"><div class="num">1305B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1306" data-tipo="MT" data-bed="M"><div class="num">1306</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1307A" data-tipo="KG" data-bed="K"><div class="num">1307A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1307B" data-tipo="KG" data-bed="K"><div class="num">1307B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1308" data-tipo="MT" data-bed="M"><div class="num">1308</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1309A" data-tipo="KG" data-bed="K"><div class="num">1309A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1309B" data-tipo="MT" data-bed="M"><div class="num">1309B</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 12 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 12</div>
+            <div class="fila">
+                <button type="button" class="hab kg" data-room="1201A" data-tipo="KG" data-bed="K"><div class="num">1201A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1201B" data-tipo="KG" data-bed="K"><div class="num">1201B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1202" data-tipo="MT" data-bed="M"><div class="num">1202</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1203A" data-tipo="KG" data-bed="K"><div class="num">1203A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1203B" data-tipo="KG" data-bed="K"><div class="num">1203B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1204" data-tipo="MT" data-bed="M"><div class="num">1204</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1205A" data-tipo="KG" data-bed="K"><div class="num">1205A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1205B" data-tipo="KG" data-bed="K"><div class="num">1205B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1206" data-tipo="MT" data-bed="M"><div class="num">1206</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1207A" data-tipo="KG" data-bed="K"><div class="num">1207A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1207B" data-tipo="KG" data-bed="K"><div class="num">1207B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1208" data-tipo="MT" data-bed="M"><div class="num">1208</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1209A" data-tipo="KG" data-bed="K"><div class="num">1209A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1209B" data-tipo="K/D" data-bed="K"><div class="num">1209B</div><div class="tipo">K/D</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 11 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 11</div>
+            <div class="fila">
+                <button type="button" class="hab kg" data-room="1101A" data-tipo="KG" data-bed="K"><div class="num">1101A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1101B" data-tipo="KG" data-bed="K"><div class="num">1101B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1102" data-tipo="MT" data-bed="M"><div class="num">1102</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1103A" data-tipo="KG" data-bed="K"><div class="num">1103A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1103B" data-tipo="KG" data-bed="K"><div class="num">1103B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1104" data-tipo="KG" data-bed="K"><div class="num">1104</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1105A" data-tipo="KG" data-bed="K"><div class="num">1105A</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1105B" data-tipo="KG" data-bed="K"><div class="num">1105B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1106" data-tipo="MT" data-bed="M"><div class="num">1106</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="1107A" data-tipo="MT" data-bed="M"><div class="num">1107A</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1107B" data-tipo="KG" data-bed="K"><div class="num">1107B</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="1108" data-tipo="KG" data-bed="K"><div class="num">1108</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="1109A" data-tipo="MT" data-bed="M"><div class="num">1109A</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="1109B" data-tipo="K/K" data-bed="K"><div class="num">1109B</div><div class="tipo">K/K</div></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- TORRE 3 · UNIQUE -->
+    <section class="torre unique">
+        <div class="torre-header">Torre 3 · UNIQUE</div>
+        <div class="torre-sub">
+        <div class="contadores">K: <span class="cnt-k">0</span> · M: <span class="cnt-m">0</span></div>
+Pisos 41 al 47 (equivalentes a 1–7)</div>
+
+        <!-- Piso 47 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 47</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="4701" data-tipo="MT" data-bed="M"><div class="num">4701</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4702" data-tipo="MT" data-bed="M"><div class="num">4702</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4703" data-tipo="MT" data-bed="M"><div class="num">4703</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4704" data-tipo="MT" data-bed="M"><div class="num">4704</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4705" data-tipo="MT" data-bed="M"><div class="num">4705</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4706" data-tipo="MT" data-bed="M"><div class="num">4706</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4707" data-tipo="PRL" data-bed="PRL"><div class="num">4707</div><div class="tipo">PRL</div></button>
+                <button type="button" class="hab mt" data-room="4709" data-tipo="MT" data-bed="M"><div class="num">4709</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4710" data-tipo="MT" data-bed="M"><div class="num">4710</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4711" data-tipo="MT" data-bed="M"><div class="num">4711</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4712" data-tipo="MT" data-bed="M"><div class="num">4712</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4714" data-tipo="KG" data-bed="K"><div class="num">4714</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4715" data-tipo="MT" data-bed="M"><div class="num">4715</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4716" data-tipo="KG" data-bed="K"><div class="num">4716</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4717" data-tipo="MT" data-bed="M"><div class="num">4717</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4718" data-tipo="KG" data-bed="K"><div class="num">4718</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4719" data-tipo="MT" data-bed="M"><div class="num">4719</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4720" data-tipo="MT" data-bed="M"><div class="num">4720</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4721" data-tipo="KG" data-bed="K"><div class="num">4721</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4722" data-tipo="MT" data-bed="M"><div class="num">4722</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4723" data-tipo="KG" data-bed="K"><div class="num">4723</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4724" data-tipo="MT" data-bed="M"><div class="num">4724</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4725" data-tipo="KG" data-bed="K"><div class="num">4725</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4726" data-tipo="MT" data-bed="M"><div class="num">4726</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4727" data-tipo="KG" data-bed="K"><div class="num">4727</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4728" data-tipo="MT" data-bed="M"><div class="num">4728</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4729" data-tipo="KG" data-bed="K"><div class="num">4729</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4730" data-tipo="MT" data-bed="M"><div class="num">4730</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4731" data-tipo="MT" data-bed="M"><div class="num">4731</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4732" data-tipo="MT" data-bed="M"><div class="num">4732</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4733" data-tipo="MT" data-bed="M"><div class="num">4733</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 46 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 46</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="4601" data-tipo="MT" data-bed="M"><div class="num">4601</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4602" data-tipo="MT" data-bed="M"><div class="num">4602</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4603" data-tipo="MT" data-bed="M"><div class="num">4603</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4604" data-tipo="MT" data-bed="M"><div class="num">4604</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4605" data-tipo="MT" data-bed="M"><div class="num">4605</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4606" data-tipo="MT" data-bed="M"><div class="num">4606</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4607" data-tipo="KY KG" data-bed="K"><div class="num">4607</div><div class="tipo">KY KG</div></button>
+                <button type="button" class="hab kg" data-room="4608" data-tipo="KY KG" data-bed="K"><div class="num">4608</div><div class="tipo">KY KG</div></button>
+                <button type="button" class="hab mt" data-room="4609" data-tipo="MT" data-bed="M"><div class="num">4609</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4610" data-tipo="MT" data-bed="M"><div class="num">4610</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4611" data-tipo="MT" data-bed="M"><div class="num">4611</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4612" data-tipo="MT" data-bed="M"><div class="num">4612</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4614" data-tipo="KG" data-bed="K"><div class="num">4614</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4615" data-tipo="MT" data-bed="M"><div class="num">4615</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4616" data-tipo="KG" data-bed="K"><div class="num">4616</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4617" data-tipo="MT" data-bed="M"><div class="num">4617</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4618" data-tipo="KG" data-bed="K"><div class="num">4618</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4619" data-tipo="MT" data-bed="M"><div class="num">4619</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4620" data-tipo="MT" data-bed="M"><div class="num">4620</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4621" data-tipo="KG" data-bed="K"><div class="num">4621</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4622" data-tipo="MT" data-bed="M"><div class="num">4622</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4623" data-tipo="KG" data-bed="K"><div class="num">4623</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4624" data-tipo="MT" data-bed="M"><div class="num">4624</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4625" data-tipo="KG" data-bed="K"><div class="num">4625</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4626" data-tipo="MT" data-bed="M"><div class="num">4626</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4627" data-tipo="KG" data-bed="K"><div class="num">4627</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4628" data-tipo="MT" data-bed="M"><div class="num">4628</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4629" data-tipo="KG" data-bed="K"><div class="num">4629</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4630" data-tipo="MT" data-bed="M"><div class="num">4630</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4631" data-tipo="KG" data-bed="K"><div class="num">4631</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4632" data-tipo="MT" data-bed="M"><div class="num">4632</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4633" data-tipo="MT" data-bed="M"><div class="num">4633</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 45 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 45</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="4501" data-tipo="MT" data-bed="M"><div class="num">4501</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4502" data-tipo="MT" data-bed="M"><div class="num">4502</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4503" data-tipo="MT" data-bed="M"><div class="num">4503</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4504" data-tipo="MT" data-bed="M"><div class="num">4504</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4505" data-tipo="MT" data-bed="M"><div class="num">4505</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4506" data-tipo="MT" data-bed="M"><div class="num">4506</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4507" data-tipo="KY KG" data-bed="K"><div class="num">4507</div><div class="tipo">KY KG</div></button>
+                <button type="button" class="hab kg" data-room="4508" data-tipo="KY KG" data-bed="K"><div class="num">4508</div><div class="tipo">KY KG</div></button>
+                <button type="button" class="hab mt" data-room="4509" data-tipo="MT" data-bed="M"><div class="num">4509</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4510" data-tipo="MT" data-bed="M"><div class="num">4510</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4511" data-tipo="MT" data-bed="M"><div class="num">4511</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4512" data-tipo="MT" data-bed="M"><div class="num">4512</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4514" data-tipo="KG/CM" data-bed="K"><div class="num">4514</div><div class="tipo">KG/CM</div></button>
+                <button type="button" class="hab mt" data-room="4515" data-tipo="MT/CM" data-bed="M"><div class="num">4515</div><div class="tipo">MT/CM</div></button>
+                <button type="button" class="hab kg" data-room="4516" data-tipo="KG/CM" data-bed="K"><div class="num">4516</div><div class="tipo">KG/CM</div></button>
+                <button type="button" class="hab mt" data-room="4517" data-tipo="MT/CM" data-bed="M"><div class="num">4517</div><div class="tipo">MT/CM</div></button>
+                <button type="button" class="hab kg" data-room="4518" data-tipo="KG/CM" data-bed="K"><div class="num">4518</div><div class="tipo">KG/CM</div></button>
+                <button type="button" class="hab mt" data-room="4519" data-tipo="MT/CM" data-bed="M"><div class="num">4519</div><div class="tipo">MT/CM</div></button>
+                <button type="button" class="hab mt" data-room="4520" data-tipo="MT" data-bed="M"><div class="num">4520</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4521" data-tipo="KG" data-bed="K"><div class="num">4521</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4522" data-tipo="MT" data-bed="M"><div class="num">4522</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4523" data-tipo="KG" data-bed="K"><div class="num">4523</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4524" data-tipo="MT" data-bed="M"><div class="num">4524</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4525" data-tipo="KG" data-bed="K"><div class="num">4525</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4526" data-tipo="MT" data-bed="M"><div class="num">4526</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4527" data-tipo="KG" data-bed="K"><div class="num">4527</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4528" data-tipo="MT" data-bed="M"><div class="num">4528</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4529" data-tipo="KG" data-bed="K"><div class="num">4529</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4530" data-tipo="MT" data-bed="M"><div class="num">4530</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4531" data-tipo="KG" data-bed="K"><div class="num">4531</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4532" data-tipo="MT" data-bed="M"><div class="num">4532</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4533" data-tipo="MT" data-bed="M"><div class="num">4533</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 44 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 44</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="4401" data-tipo="MT" data-bed="M"><div class="num">4401</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4402" data-tipo="MT" data-bed="M"><div class="num">4402</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4403" data-tipo="MT" data-bed="M"><div class="num">4403</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4404" data-tipo="MT" data-bed="M"><div class="num">4404</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4405" data-tipo="MT" data-bed="M"><div class="num">4405</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4406" data-tipo="MT" data-bed="M"><div class="num">4406</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4409" data-tipo="MT" data-bed="M"><div class="num">4409</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4410" data-tipo="MT" data-bed="M"><div class="num">4410</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4411" data-tipo="MT" data-bed="M"><div class="num">4411</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4412" data-tipo="MT" data-bed="M"><div class="num">4412</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4414" data-tipo="KG" data-bed="K"><div class="num">4414</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4415" data-tipo="MT" data-bed="M"><div class="num">4415</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4416" data-tipo="KG" data-bed="K"><div class="num">4416</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4417" data-tipo="MT" data-bed="M"><div class="num">4417</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4418" data-tipo="KG" data-bed="K"><div class="num">4418</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4419" data-tipo="MT" data-bed="M"><div class="num">4419</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4420" data-tipo="MT" data-bed="M"><div class="num">4420</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4421" data-tipo="KG" data-bed="K"><div class="num">4421</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4422" data-tipo="MT" data-bed="M"><div class="num">4422</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4423" data-tipo="KG" data-bed="K"><div class="num">4423</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4424" data-tipo="MT" data-bed="M"><div class="num">4424</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4425" data-tipo="KG" data-bed="K"><div class="num">4425</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4426" data-tipo="MT" data-bed="M"><div class="num">4426</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4427" data-tipo="KG" data-bed="K"><div class="num">4427</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4428" data-tipo="MT" data-bed="M"><div class="num">4428</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4429" data-tipo="KG" data-bed="K"><div class="num">4429</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4430" data-tipo="MT" data-bed="M"><div class="num">4430</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4431" data-tipo="KG" data-bed="K"><div class="num">4431</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4432" data-tipo="MT" data-bed="M"><div class="num">4432</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4433" data-tipo="MT" data-bed="M"><div class="num">4433</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 43 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 43</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="4312" data-tipo="MT" data-bed="M"><div class="num">4312</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4314" data-tipo="DDP" data-bed="DDP"><div class="num">4314</div><div class="tipo">DDP</div></button>
+                <button type="button" class="hab mt" data-room="4315" data-tipo="MT/CM" data-bed="M"><div class="num">4315</div><div class="tipo">MT/CM</div></button>
+                <button type="button" class="hab mt" data-room="4316" data-tipo="DDP" data-bed="DDP"><div class="num">4316</div><div class="tipo">DDP</div></button>
+                <button type="button" class="hab mt" data-room="4317" data-tipo="MT/CM" data-bed="M"><div class="num">4317</div><div class="tipo">MT/CM</div></button>
+                <button type="button" class="hab mt" data-room="4318" data-tipo="DDP" data-bed="DDP"><div class="num">4318</div><div class="tipo">DDP</div></button>
+                <button type="button" class="hab mt" data-room="4319" data-tipo="MT/CM" data-bed="M"><div class="num">4319</div><div class="tipo">MT/CM</div></button>
+                <button type="button" class="hab mt" data-room="4320" data-tipo="MT" data-bed="M"><div class="num">4320</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4321" data-tipo="KG" data-bed="K"><div class="num">4321</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4322" data-tipo="MT" data-bed="M"><div class="num">4322</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4323" data-tipo="KG" data-bed="K"><div class="num">4323</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4324" data-tipo="MT" data-bed="M"><div class="num">4324</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4325" data-tipo="KG" data-bed="K"><div class="num">4325</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4326" data-tipo="MT" data-bed="M"><div class="num">4326</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4327" data-tipo="KG" data-bed="K"><div class="num">4327</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4328" data-tipo="MT" data-bed="M"><div class="num">4328</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4329" data-tipo="KG" data-bed="K"><div class="num">4329</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4330" data-tipo="MT" data-bed="M"><div class="num">4330</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4331" data-tipo="KG" data-bed="K"><div class="num">4331</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4332" data-tipo="MT" data-bed="M"><div class="num">4332</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4333" data-tipo="MT" data-bed="M"><div class="num">4333</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 42 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 42</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="4212" data-tipo="MT" data-bed="M"><div class="num">4212</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4214" data-tipo="KG" data-bed="K"><div class="num">4214</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4215" data-tipo="MT" data-bed="M"><div class="num">4215</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4216" data-tipo="KG" data-bed="K"><div class="num">4216</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4217" data-tipo="MT" data-bed="M"><div class="num">4217</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4218" data-tipo="KG" data-bed="K"><div class="num">4218</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4219" data-tipo="MT" data-bed="M"><div class="num">4219</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4220" data-tipo="MT" data-bed="M"><div class="num">4220</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4221" data-tipo="KG" data-bed="K"><div class="num">4221</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4222" data-tipo="MT" data-bed="M"><div class="num">4222</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4223" data-tipo="KG" data-bed="K"><div class="num">4223</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4224" data-tipo="MT" data-bed="M"><div class="num">4224</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4225" data-tipo="KG" data-bed="K"><div class="num">4225</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4226" data-tipo="MT" data-bed="M"><div class="num">4226</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4227" data-tipo="KG" data-bed="K"><div class="num">4227</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4228" data-tipo="MT" data-bed="M"><div class="num">4228</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4229" data-tipo="KG" data-bed="K"><div class="num">4229</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4230" data-tipo="MT" data-bed="M"><div class="num">4230</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab kg" data-room="4231" data-tipo="KG" data-bed="K"><div class="num">4231</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="4232" data-tipo="MT" data-bed="M"><div class="num">4232</div><div class="tipo">MT</div></button>
+                <button type="button" class="hab mt" data-room="4233" data-tipo="MT" data-bed="M"><div class="num">4233</div><div class="tipo">MT</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 41 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 41</div>
+            <div class="fila">
+                <button type="button" class="hab kg" data-room="4112" data-tipo="KG" data-bed="K"><div class="num">4112</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4114" data-tipo="KG" data-bed="K"><div class="num">4114</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4115" data-tipo="KG" data-bed="K"><div class="num">4115</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4116" data-tipo="KG" data-bed="K"><div class="num">4116</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4117" data-tipo="KG" data-bed="K"><div class="num">4117</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4118" data-tipo="KG" data-bed="K"><div class="num">4118</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4119" data-tipo="KG" data-bed="K"><div class="num">4119</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4120" data-tipo="KG" data-bed="K"><div class="num">4120</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4121" data-tipo="KG" data-bed="K"><div class="num">4121</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4122" data-tipo="KG" data-bed="K"><div class="num">4122</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4123" data-tipo="KG" data-bed="K"><div class="num">4123</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4124" data-tipo="KG" data-bed="K"><div class="num">4124</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4125" data-tipo="KG" data-bed="K"><div class="num">4125</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4126" data-tipo="KG" data-bed="K"><div class="num">4126</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4127" data-tipo="KG" data-bed="K"><div class="num">4127</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4128" data-tipo="KG" data-bed="K"><div class="num">4128</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4129" data-tipo="KG" data-bed="K"><div class="num">4129</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4130" data-tipo="KG" data-bed="K"><div class="num">4130</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4131" data-tipo="KG" data-bed="K"><div class="num">4131</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="4132" data-tipo="KG" data-bed="K"><div class="num">4132</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+    </section>
+
+
+    <!-- TORRE 4 · JOLLA -->
+    <section class="torre jolla">
+        <div class="torre-header">Torre 4 · JOLLA</div>
+        <div class="torre-sub">
+        <div class="contadores">K: <span class="cnt-k">0</span> · M: <span class="cnt-m">0</span></div>
+Pisos 1 al 6</div>
+
+        <!-- Piso 6 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 6</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="601" data-tipo="KK/D" data-bed="K"><div class="num">601</div><div class="tipo">KK/D</div></button>
+                <button type="button" class="hab mt" data-room="602" data-tipo="KK/D" data-bed="K"><div class="num">602</div><div class="tipo">KK/D</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 5 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 5</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="501" data-tipo="KG/MT" data-bed="K"><div class="num">501</div><div class="tipo">KG/MT</div></button>
+                <button type="button" class="hab kg" data-room="504" data-tipo="KG" data-bed="K"><div class="num">504</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab mt" data-room="505" data-tipo="KG/MT" data-bed="K"><div class="num">505</div><div class="tipo">KG/MT</div></button>
+                <button type="button" class="hab kg" data-room="509" data-tipo="KG" data-bed="K"><div class="num">509</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="511" data-tipo="KG" data-bed="K"><div class="num">511</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 4 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 4</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="406" data-tipo="KG/MT" data-bed="K"><div class="num">406</div><div class="tipo">KG/MT</div></button>
+                <button type="button" class="hab kg" data-room="407" data-tipo="KG" data-bed="K"><div class="num">407</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="409" data-tipo="KG" data-bed="K"><div class="num">409</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="411" data-tipo="KG" data-bed="K"><div class="num">411</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 3 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 3</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="301" data-tipo="KG/MT" data-bed="K"><div class="num">301</div><div class="tipo">KG/MT</div></button>
+                <button type="button" class="hab mt" data-room="302" data-tipo="KG/MT" data-bed="K"><div class="num">302</div><div class="tipo">KG/MT</div></button>
+                <button type="button" class="hab kg" data-room="309" data-tipo="KG" data-bed="K"><div class="num">309</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="310" data-tipo="KG" data-bed="K"><div class="num">310</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="311" data-tipo="KIN" data-bed="K"><div class="num">311</div><div class="tipo">KIN</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 2 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 2</div>
+            <div class="fila">
+                <button type="button" class="hab mt" data-room="201" data-tipo="KG/MT" data-bed="K"><div class="num">201</div><div class="tipo">KG/MT</div></button>
+                <button type="button" class="hab mt" data-room="206" data-tipo="KG/MT" data-bed="K"><div class="num">206</div><div class="tipo">KG/MT</div></button>
+                <button type="button" class="hab kg" data-room="211" data-tipo="KG" data-bed="K"><div class="num">211</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="212" data-tipo="KG" data-bed="K"><div class="num">212</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+
+        <!-- Piso 1 -->
+        <div class="piso">
+            <div class="piso-titulo">Piso 1</div>
+            <div class="fila">
+                <button type="button" class="hab kg" data-room="108" data-tipo="KG" data-bed="K"><div class="num">108</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="109" data-tipo="KG" data-bed="K"><div class="num">109</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="110" data-tipo="KG" data-bed="K"><div class="num">110</div><div class="tipo">KG</div></button>
+                <button type="button" class="hab kg" data-room="111" data-tipo="KG" data-bed="K"><div class="num">111</div><div class="tipo">KG</div></button>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Contadores K/M por torre (según texto del tipo)
+  document.querySelectorAll('.torre').forEach(torre => {
+    let k = 0, m = 0;
+    torre.querySelectorAll('.hab .tipo').forEach(t => {
+      const txt = t.textContent.trim().toUpperCase();
+      if (txt.startsWith('K')) k++;
+      if (txt.startsWith('M')) m++;
+    });
+    const kSpan = torre.querySelector('.cnt-k');
+    const mSpan = torre.querySelector('.cnt-m');
+    if (kSpan) kSpan.textContent = k;
+    if (mSpan) mSpan.textContent = m;
+  });
+
+  // Panel lateral JOLLA: acciones
+  const btnSave = document.getElementById('jSave');
+  const btnClear = document.getElementById('jClear');
+  if(btnSave){
+    btnSave.addEventListener('click', () => {
+      if(!jollaSelectedRoom) return;
+      const cat = document.getElementById('jCat')?.value || "SIN_ASIGNAR";
+      const avail = document.getElementById('jAvail')?.value || "NO";
+      setJollaRoomMeta(jollaSelectedRoom, {cat, avail});
+      updateJollaSide();
+    });
+  }
+  if(btnClear){
+    btnClear.addEventListener('click', () => {
+      jollaSelectedRoom = null;
+      openJollaEditor(null);
+      updateJollaSide();
+    });
+  }
+
+  // Si arrancas en JOLLA (por URL o persistencia futura), refresca
+  if(document.body.dataset.mode === "JOLLA"){
+    updateJollaSide();
+  }
+});
+</script>
+
+
+</div>
+</section>
+
+<footer class="firma">
+    Formato de apoyo a la operación del Departamento de Ama de Llaves — Krystal Grand Los Cabos.<br>
+    Responsable operativo: Luis Hernaldo, Asistente Operativo de Ama de Llaves.<br>
+    <span class="julu">JULU®</span>
+</footer>
+
+
+<script>
+function updateDateTime(){
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
+  const timeStr = now.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  const d = document.querySelector('.datetime .date');
+  const t = document.querySelector('.datetime .time');
+  if(d) d.textContent = dateStr;
+  if(t) t.textContent = timeStr;
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+</script>
+
+
+<div class="modal-backdrop" id="invBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="invTitle">
+    <header>
+      <div>
+        <h2 id="invTitle">Inventario por Habitación</h2>
+        <div class="subline" id="invSub">—</div>
+      </div>
+      <button class="close-btn" id="invClose">Cerrar ✕</button>
+    </header>
+
+    <div class="quick" id="statusQuick">
+      <button class="qbtn active" data-status="OK">✅ OK</button>
+      <button class="qbtn" data-status="PENDIENTE">⏳ Pendiente</button>
+      <button class="qbtn" data-status="INCIDENCIA">⚠️ Incidencia</button>
+      <button class="qbtn" data-status="FALTANTE">🧾 Faltante</button>
+      <button class="qbtn" data-status="DANIADO">🛠️ Dañado</button>
+    </div>
+
+    <div class="grid-2">
+      <section class="card">
+        <h3>Blancos</h3>
+        <div class="fields">
+          <div class="field"><label>Sábanas</label><input type="number" min="0" id="f_sabanas" value="0"></div>
+          <div class="field"><label>Fundas</label><input type="number" min="0" id="f_fundas" value="0"></div>
+          <div class="field"><label>Protect. almohada</label><input type="number" min="0" id="f_prot_alm" value="0"></div>
+          <div class="field"><label>Almohadas</label><input type="number" min="0" id="f_almohadas" value="0"></div>
+          <div class="field"><label>Duvet (inserto)</label><input type="number" min="0" id="f_duvet" value="0"></div>
+          <div class="field"><label>Funda duvet</label><input type="number" min="0" id="f_funda_duvet" value="0"></div>
+          <div class="field"><label>Toallas baño</label><input type="number" min="0" id="f_tbano" value="0"></div>
+          <div class="field"><label>Toallas mano</label><input type="number" min="0" id="f_tmano" value="0"></div>
+          <div class="field"><label>Toallas faciales</label><input type="number" min="0" id="f_tfacial" value="0"></div>
+          <div class="field"><label>Tapetes</label><input type="number" min="0" id="f_tapetes" value="0"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Activos & Mobiliario</h3>
+        <div class="fields">
+          <div class="field"><label>Teléfonos</label><input type="number" min="0" id="f_telefonos" value="0"></div>
+          <div class="field"><label>Televisores</label><input type="number" min="0" id="f_tv" value="0"></div>
+          <div class="field"><label>Minibares</label><input type="number" min="0" id="f_minibar" value="0"></div>
+          <div class="field"><label>Sillón</label>
+            <select id="f_sillon">
+              <option value="N/A">N/A</option>
+              <option value="NUEVO_TAPIZADO">Nuevo tapizado</option>
+              <option value="POR_TAPIZAR">Por tapizar</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1 / -1;">
+            <label>Responsable (auto)</label>
+            <input type="text" id="f_responsable" placeholder="Ej. Luis Hernaldo / Supervisora X">
+          </div>
+          <div class="field" style="grid-column:1 / -1;">
+            <label>Notas / Observaciones</label>
+            <textarea id="f_notas" placeholder="Ej. Faltan 2 toallas mano, minibar sin charola, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn secondary" id="btnHist">Ver historial</button>
+          <button class="btn secondary" id="btnLog">Bitácora / Pendientes</button>
+          <button class="btn secondary" id="btnCSV">Exportar CSV (esta habitación)</button>
+          <button class="btn primary" id="btnSave">Guardar en Supabase</button>
+        </div>
+
+        <div class="hint">
+          Para activar Supabase: pega tu <b>SUPABASE_URL</b> y <b>SUPABASE_ANON_KEY</b> en el script.  
+          Recomendado: consulta pública (SELECT) y escritura solo con login (Auth + RLS).
+        </div>
+
+        <div class="history" id="histBox" style="display:none;"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-backdrop" id="logBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="logTitle">
+    <header>
+      <div>
+        <h2 id="logTitle">Bitácora de Pendientes</h2>
+        <div class="subline" id="logSub">—</div>
+      </div>
+      <button class="close-btn" id="logClose">Cerrar ✕</button>
+    </header>
+
+    <div class="grid-2">
+      <section class="card">
+        <h3>Mantenimiento</h3>
+        <div class="fields" style="grid-template-columns:1fr 1fr;">
+          <div class="field" style="grid-column:1/-1;">
+            <label>Título (corto)</label>
+            <input id="m_title" placeholder="Ej. Plafón regadera caído">
+          </div>
+          <div class="field">
+            <label>Prioridad</label>
+            <select id="m_prio">
+              <option value="BAJA">Baja</option>
+              <option value="MEDIA" selected>Media</option>
+              <option value="ALTA">Alta</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Estatus</label>
+            <select id="m_status">
+              <option value="ABIERTO" selected>Abierto</option>
+              <option value="EN_PROCESO">En proceso</option>
+              <option value="TERMINADO">Terminado</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label>Detalle</label>
+            <textarea id="m_desc" placeholder="Describe el problema y ubicación exacta..."></textarea>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label>Evidencia (fotos/archivos)</label>
+            <input id="m_files" type="file" multiple>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn secondary" id="m_add">Agregar ticket</button>
+          <button class="btn secondary" id="m_refresh">Actualizar lista</button>
+        </div>
+        <div class="history" id="m_list"></div>
+      </section>
+
+      <section class="card">
+        <h3>Ama de Llaves</h3>
+        <div class="fields" style="grid-template-columns:1fr 1fr;">
+          <div class="field" style="grid-column:1/-1;">
+            <label>Título (corto)</label>
+            <input id="h_title" placeholder="Ej. Sábana rota, requiere cambio">
+          </div>
+          <div class="field">
+            <label>Prioridad</label>
+            <select id="h_prio">
+              <option value="BAJA">Baja</option>
+              <option value="MEDIA" selected>Media</option>
+              <option value="ALTA">Alta</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Estatus</label>
+            <select id="h_status">
+              <option value="ABIERTO" selected>Abierto</option>
+              <option value="EN_PROCESO">En proceso</option>
+              <option value="TERMINADO">Terminado</option>
+            </select>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label>Detalle</label>
+            <textarea id="h_desc" placeholder="Describe el pendiente de Ama de Llaves..."></textarea>
+          </div>
+          <div class="field" style="grid-column:1/-1;">
+            <label>Evidencia (fotos/archivos)</label>
+            <input id="h_files" type="file" multiple>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn secondary" id="h_add">Agregar ticket</button>
+          <button class="btn secondary" id="h_refresh">Actualizar lista</button>
+        </div>
+        <div class="history" id="h_list"></div>
+
+        <div class="hint" style="margin-top:10px;">
+          Para certificar a <b>VERDE</b>, la habitación debe quedar sin tickets en <b>ABIERTO</b> o <b>EN PROCESO</b> (en ambos apartados).
+        </div>
+      </section>
+    </div>
+
+    <div class="actions" style="margin-top:12px;">
+      <button class="btn secondary" id="btnBackToInv">Regresar</button>
+      <button class="btn primary" id="btnCertify" title="Se habilita solo si no hay pendientes abiertos/en proceso">Certificar VERDE</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* =========================
+   CONFIG SUPABASE (opcional)
+   ========================= */
+const SUPABASE_URL = "";      // <-- pega aquí
+const SUPABASE_ANON_KEY = ""; // <-- pega aquí
+const supaReady = SUPABASE_URL && SUPABASE_ANON_KEY;
+const supabase = supaReady ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+// Storage bucket sugerido para evidencia
+const EVIDENCE_BUCKET = "room-evidence";
+
+/* =========================
+   HELPERS
+   ========================= */
+const $ = (q) => document.querySelector(q);
+const $$ = (q) => Array.from(document.querySelectorAll(q));
+
+const toast = (msg) => {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.style.display = "block";
+  clearTimeout(window.__t);
+  window.__t = setTimeout(()=> el.style.display="none", 2600);
+};
+const num = (id) => Math.max(0, parseInt($(id).value || "0", 10) || 0);
+const nowISO = () => new Date().toISOString();
+
+function escapeHtml(str){
+  return String(str ?? "").replace(/[&<>"']/g, (m)=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[m]));
+}
+
+/* =========================
+   MODOS (tabs) & VISTAS
+   ========================= */
+const MODES = ["HOME","CHECKLIST","PULIDAS","MPLP","VISTAS","JOLLA"];
+let currentMode = "HOME";
+
+function setMode(mode){
+  if(!MODES.includes(mode)) mode = "HOME";
+  currentMode = mode;
+  document.body.dataset.mode = mode;
+
+  // Tabs active
+  $$(".tab").forEach(t => t.classList.toggle("active", t.dataset.mode === mode));
+
+  // Views
+  $("#viewHome").classList.toggle("active", mode==="HOME");
+  $("#viewChecklist").classList.toggle("active", mode==="CHECKLIST");
+  $("#viewMap").classList.toggle("active", (mode!=="HOME" && mode!=="CHECKLIST"));
+
+  // Show/Hide torres: JOLLA solo aparece en pestaña JOLLA
+  $$(".torre").forEach(t => {
+    const title = (t.querySelector(".torre-title")?.textContent || t.querySelector(".torre-header")?.textContent || "").toUpperCase();
+    const isJolla = title.includes("JOLLA");
+    if(mode === "JOLLA"){
+      t.style.display = isJolla ? "" : "none";
+    } else {
+      t.style.display = isJolla ? "none" : "";
+    }
+  });
+
+
+  // Badge
+  const badge = $("#modeBadge");
+  if(badge){
+    badge.textContent = mode;
+    badge.classList.remove("good","warn","bad");
+    badge.classList.add(mode==="HOME" ? "bad" : "good");
+  }
+
+  // Apply semáforo for selected mode
+  applySemaforoForMode(mode);
+
+  // Recalc KPIs (Home)
+  updateHomeKPIs();
+  // JOLLA side panel refresh
+  if(mode==="JOLLA") updateJollaSide();
+  if(mode==="PULIDAS") { updatePulidasSide(); applyPulidasPaint(); }
+  updateJollaPulidoKPI();
+}
+
+/* =========================
+   MAP: infer tower / room
+   ========================= */
+function inferTower(el){
+  const torre = el.closest(".torre");
+  if(!torre) return "—";
+  const title = torre.querySelector(".torre-header")?.textContent?.trim() || torre.querySelector(".torre-title")?.textContent?.trim() || torre.querySelector("h2")?.textContent?.trim() || "";
+  const t = title.toUpperCase();
+  if(t.includes("ALTITUDE")) return "ALTITUDE";
+  if(t.includes("PALMILLA")) return "PALMILLA";
+  if(t.includes("UNIQUE")) return "UNIQUE";
+  if(t.includes("JOLLA")) return "JOLLA";
+  return title.replace("TORRE","").trim() || "—";
+}
+function roomNum(el){ return el.querySelector(".num")?.textContent?.trim() || ""; }
+function roomTipo(el){ return el.querySelector(".tipo")?.textContent?.trim() || ""; }
+
+function roomKey(mode, tower, room){
+  return `${mode}::${tower}::${room}`;
+}
+
+/* =========================
+   SEMÁFORO (por modo)
+   - Por default: TODO ROJO
+   ========================= */
+const SEM_KEY = "kg_semaforo_v1"; // localStorage
+function loadSemDB(){
+  try{ return JSON.parse(localStorage.getItem(SEM_KEY) || "{}"); }catch(_){ return {}; }
+}
+function saveSemDB(db){
+  localStorage.setItem(SEM_KEY, JSON.stringify(db));
+}
+function getSem(mode, tower, room){
+  const db = loadSemDB();
+  const key = roomKey(mode, tower, room);
+  return db[key] || { sema:"ROJO", sub:"" }; // default ROJO
+}
+function setSem(mode, tower, room, sema, sub=""){
+  const db = loadSemDB();
+  const key = roomKey(mode, tower, room);
+  db[key] = { sema, sub };
+  saveSemDB(db);
+  applySemaforoForMode(mode);
+  updateHomeKPIs();
+}
+function applySemaforoForMode(mode){
+  if(mode==="HOME") return;
+  $$(".hab").forEach(b=>{
+    const tower = inferTower(b);
+    const room = roomNum(b);
+    if(!room) return;
+    const st = getSem(mode, tower, room);
+    b.dataset.sema = st.sema;
+  });
+}
+
+/* =========================
+   HOME KPIs (global en el modo seleccionado o general)
+   ========================= */
+
+function fmtISOToDMY(iso){
+  // iso: YYYY-MM-DD
+  if(!iso) return "";
+  const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m) return iso;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+function todayISO(){
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+function setPulidasTip(btn, tower, room, st, done){
+  const fecha = st?.date ? fmtISOToDMY(st.date) : "—";
+  const notes = (st?.notes || "").trim();
+  let tip = "";
+  if(done){
+    tip = `Realizado ✓\nFecha: ${fecha}` + (notes ? `\nNotas: ${notes}` : "");
+  } else {
+    tip = `Pendiente\nClick para registrar`;
+    if(st?.date) tip += `\nFecha (ref): ${fecha}`;
+    if(notes) tip += `\nNotas: ${notes}`;
+  }
+  btn.dataset.tip = tip;
+  btn.title = tip;
+}
+
+function applyPulidasPaint(){
+  if(currentMode!=="PULIDAS") return;
+  $$(".hab").forEach(btn=>{
+    const tower = inferTower(btn);
+    if(tower==="JOLLA") { btn.classList.remove("pulido-done"); btn.removeAttribute("data-tip"); btn.removeAttribute("title"); return; }
+    const room = roomNum(btn);
+    if(!room) return;
+    const st = getPulido(tower.toUpperCase(), String(room));
+    const done = parseInt(st.pct||0,10) >= 100;
+    btn.classList.toggle("pulido-done", done);
+    setPulidasTip(btn, tower.toUpperCase(), String(room), st, done);
+  });
+}
+
+function allRooms(){
+  return $$(".hab").map(b=>({ tower: inferTower(b), room: roomNum(b), tipo: roomTipo(b) })).filter(x=>x.room);
+}
+function updateHomeKPIs(){
+  const rooms = allRooms();
+  const total = rooms.length;
+
+  // Para Home: mostramos avance del modo MPLP por default (útil), o del último modo seleccionado.
+  const mode = currentMode==="HOME" ? "MPLP" : currentMode;
+
+  let g=0,y=0,r=0;
+  rooms.forEach(x=>{
+    const st = getSem(mode, x.tower, x.room).sema;
+    if(st==="VERDE") g++;
+    else if(st==="AMARILLO") y++;
+    else r++;
+  });
+
+  if($("#kpiTotal")) $("#kpiTotal").textContent = total;
+  if($("#kpiGreen")) $("#kpiGreen").textContent = g;
+  if($("#kpiYellow")) $("#kpiYellow").textContent = y;
+  if($("#kpiRed")) $("#kpiRed").textContent = r;
+}
+
+
+/* =========================
+   PULIDAS: % + fecha (local)
+   ========================= */
+const PULIDO_KEY = "KG_PULIDO_V1";
+function loadPulidoDB(){
+  try{ return JSON.parse(localStorage.getItem(PULIDO_KEY) || "{}"); }catch(e){ return {}; }
+}
+function savePulidoDB(db){
+  localStorage.setItem(PULIDO_KEY, JSON.stringify(db || {}));
+}
+function pulidoKey(tower, room){ return (tower||"—")+"|"+String(room||"").trim(); }
+function getPulido(tower, room){
+  const db = loadPulidoDB();
+  return db[pulidoKey(tower, room)] || { pct:0, date:"", notes:"" };
+}
+function setPulido(tower, room, data){
+  const db = loadPulidoDB();
+  db[pulidoKey(tower, room)] = { pct: clampInt(data.pct,0,100), date: data.date||"", notes: (data.notes||"").slice(0,800) };
+  savePulidoDB(db);
+  updateHomePulidas();
+}
+function clampInt(n, a, b){
+  const x = parseInt(n,10);
+  if(Number.isNaN(x)) return a;
+  return Math.max(a, Math.min(b, x));
+}
+function pctAvg(items){
+  if(!items.length) return 0;
+  const s = items.reduce((acc, it)=> acc + clampInt(it.pct,0,100), 0);
+  return Math.round(s / items.length);
+}
+function setBar(id, pct){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.width = Math.max(0, Math.min(100, pct)) + "%";
+}
+
+/* compute pulidas summary by towers (Altitude/Palmilla/Unique) */
+function getRoomsByTower(){
+  const map = { ALTITUDE:[], PALMILLA:[], UNIQUE:[], JOLLA:[] };
+  $$(".hab").forEach(b=>{
+    const tower = inferTower(b);
+    const room = roomNum(b);
+    if(!room) return;
+    const keyTower = (tower||"").toUpperCase();
+    if(keyTower.includes("ALTITUDE")) map.ALTITUDE.push({room, el:b});
+    else if(keyTower.includes("PALMILLA")) map.PALMILLA.push({room, el:b});
+    else if(keyTower.includes("UNIQUE")) map.UNIQUE.push({room, el:b});
+    else if(keyTower.includes("JOLLA")) map.JOLLA.push({room, el:b});
+  });
+  return map;
+}
+
+
+/* =========================
+   HOME: Pulidas resumen (consulta)
+   ========================= */
+function updateHomePulidas(){
+  // Calcula con base en registros de pulido (PULIDO_KEY) y catálogo actual.
+  const rooms = getRoomsByTower();
+  const A = rooms.ALTITUDE.map(x=>getPulido("ALTITUDE", x.room));
+  const P = rooms.PALMILLA.map(x=>getPulido("PALMILLA", x.room));
+  const U = rooms.UNIQUE.map(x=>getPulido("UNIQUE", x.room));
+  const all = A.concat(P,U);
+
+  const overall = pctAvg(all);
+  const pa = pctAvg(A);
+  const pp = pctAvg(P);
+  const pu = pctAvg(U);
+
+  const setTxt=(id,val)=>{ const el=document.getElementById(id); if(el) el.textContent=(val||0)+"%"; };
+  setTxt("homePulOverall", overall);
+  setTxt("homePulA", pa);
+  setTxt("homePulP", pp);
+  setTxt("homePulU", pu);
+}
+
+function updatePulidasSide(){
+  if(currentMode!=="PULIDAS") return;
+
+  const rooms = getRoomsByTower();
+  // Solo torres: ALTITUDE / PALMILLA / UNIQUE (JOLLA no se considera aquí)
+  const A = rooms.ALTITUDE.map(x=>getPulido("ALTITUDE", x.room));
+  const P = rooms.PALMILLA.map(x=>getPulido("PALMILLA", x.room));
+  const U = rooms.UNIQUE.map(x=>getPulido("UNIQUE", x.room));
+
+  const all = A.concat(P,U);
+
+  const overall = pctAvg(all);
+  const pa = pctAvg(A);
+  const pp = pctAvg(P);
+  const pu = pctAvg(U);
+
+  const body = document.getElementById("pSumBody");
+  if(!body) return;
+
+  body.innerHTML = "";
+  const row = (label, val, bold=false)=>{
+    const tr = document.createElement("tr");
+    const td1 = document.createElement("td");
+    const td2 = document.createElement("td");
+    td2.style.textAlign = "right";
+    td1.innerHTML = bold ? `<b>${label}</b>` : label;
+    td2.innerHTML = bold ? `<b>${val}%</b>` : `${val}%`;
+    tr.appendChild(td1); tr.appendChild(td2);
+    if(bold) tr.className = "sum-row";
+    return tr;
+  };
+
+  body.appendChild(row("GENERAL", overall, true));
+  body.appendChild(row("Altitude", pa));
+  body.appendChild(row("Palmilla", pp));
+  body.appendChild(row("Unique", pu));
+}
+
+function updateJollaPulidoKPI
+
+(){
+  // KPI en panel JOLLA: promedio de pulido para habitaciones de JOLLA
+  const rooms = getRoomsByTower().JOLLA;
+  const arr = rooms.map(x=> getPulido("JOLLA", x.room));
+  const pct = pctAvg(arr);
+  if($("#jollaPulidoPct")) $("#jollaPulidoPct").textContent = pct;
+  setBar("jollaPulidoBar", pct);
+}
+
+
+/* =========================
+   INVENTORY MODAL (principal)
+   ========================= */
+let currentRoom = null; // {tower, room, tipo}
+let invStatusQuick = "OK";
+
+function openInvModal(roomObj){
+  currentRoom = roomObj;
+  $("#invSub").textContent = `${currentMode} · ${roomObj.tower} · Habitación ${roomObj.room} · Tipo ${roomObj.tipo}`;
+  $("#invBackdrop").style.display = "flex";
+  $("#invBackdrop").setAttribute("aria-hidden","false");
+  $("#histBox").style.display = "none";
+  $("#histBox").innerHTML = "";
+
+  // Quick status reset
+  $$("#statusQuick .qbtn").forEach(b=>b.classList.toggle("active", b.dataset.status==="OK"));
+  invStatusQuick = "OK";
+
+  // Semáforo badge inside modal (simple)
+  renderSemInfo();
+  updateCertifyButtonState(); // in case already open tickets
+}
+function closeInvModal(){
+  $("#invBackdrop").style.display = "none";
+  $("#invBackdrop").setAttribute("aria-hidden","true");
+  currentRoom = null;
+}
+
+/* =========================
+   PULIDAS · Modal por habitación
+   ========================= */
+let pulActive = null;
+
+function openPulidasEditor(obj){
+  // obj: {tower, room}
+  if(!obj || !obj.tower || !obj.room) return;
+  pulActive = { tower: String(obj.tower).toUpperCase(), room: String(obj.room).trim() };
+
+  const st = getPulido(pulActive.tower, pulActive.room);
+
+  // Header
+  const sub = document.getElementById("pulSub");
+  if(sub) sub.textContent = `${pulActive.tower} · Hab ${pulActive.room}`;
+
+  // Fill fields
+  const done = document.getElementById("pulDone");
+  const date = document.getElementById("pulDate");
+  const pct  = document.getElementById("pulPct");
+  const notes= document.getElementById("pulNotes");
+
+  if(done) done.checked = (clampInt(st.pct,0,100) >= 100);
+  if(date) date.value = st.date || "";
+  if(pct)  pct.value = clampInt(st.pct,0,100);
+  if(notes)notes.value = st.notes || "";
+
+  // Info
+  const info = document.getElementById("pulInfo");
+  if(info){
+    info.innerHTML = `<b>${pulActive.tower}</b> · Hab <b>${pulActive.room}</b><br><span class="mini">Tipo: ${roomTipoFor(pulActive.tower, pulActive.room) || "—"}</span>`;
+  }
+
+  // Open
+  const back = document.getElementById("pulBackdrop");
+  if(back) back.style.display = "flex";
+}
+
+function closePulidasEditor(){
+  const back = document.getElementById("pulBackdrop");
+  if(back) back.style.display = "none";
+  pulActive = null;
+}
+
+function roomTipoFor(tower, room){
+  // busca el botón de esa habitación y toma su tipo (KG/MT/...)
+  const btn = $$(".hab").find(b => inferTower(b)===tower && roomNum(b)===String(room));
+  return btn ? roomTipo(btn) : "";
+}
+
+function renderSemInfo(){
+  if(!currentRoom) return;
+  const st = getSem(currentMode, currentRoom.tower, currentRoom.room);
+  const label = $("#invTitle");
+  if(label){
+    // Keep title, just append small badge in subline (already there)
+  }
+  // Add sub badge (LP rentable) via subline tail
+  if(st.sema==="VERDE" && st.sub==="LP"){
+    $("#invSub").innerHTML = `${escapeHtml(currentMode)} · ${escapeHtml(currentRoom.tower)} · Habitación ${escapeHtml(currentRoom.room)} · Tipo ${escapeHtml(currentRoom.tipo)} <span class="badge good" style="margin-left:10px;">LP · RENTABLE</span>`;
+  } else if(st.sema==="VERDE"){
+    $("#invSub").innerHTML = `${escapeHtml(currentMode)} · ${escapeHtml(currentRoom.tower)} · Habitación ${escapeHtml(currentRoom.room)} · Tipo ${escapeHtml(currentRoom.tipo)} <span class="badge good" style="margin-left:10px;">CERTIFICADA</span>`;
+  } else if(st.sema==="AMARILLO"){
+    $("#invSub").innerHTML = `${escapeHtml(currentMode)} · ${escapeHtml(currentRoom.tower)} · Habitación ${escapeHtml(currentRoom.room)} · Tipo ${escapeHtml(currentRoom.tipo)} <span class="badge warn" style="margin-left:10px;">EN SEGUIMIENTO</span>`;
+  } else {
+    $("#invSub").innerHTML = `${escapeHtml(currentMode)} · ${escapeHtml(currentRoom.tower)} · Habitación ${escapeHtml(currentRoom.room)} · Tipo ${escapeHtml(currentRoom.tipo)} <span class="badge bad" style="margin-left:10px;">PENDIENTE</span>`;
+  }
+}
+
+/* Semáforo controls (simple 3 botones + sub LP en MPLP) */
+function setSemFromUI(sema){
+  if(!currentRoom) return;
+  let sub = "";
+  if(currentMode==="MPLP" && sema==="VERDE"){
+    // si quieren marcar "LP rentable" lo tomamos de checkbox
+    const lp = $("#chkLP")?.checked;
+    sub = lp ? "LP" : "";
+  }
+  setSem(currentMode, currentRoom.tower, currentRoom.room, sema, sub);
+  renderSemInfo();
+  toast(`Semáforo: ${sema}${sub ? " · "+sub : ""}`);
+}
+
+/* =========================
+   INVENTORY: Save / History (opcional supabase)
+   ========================= */
+async function saveInventoryEntry(){
+  if(!currentRoom) return;
+
+  const payload = {
+    module: currentMode,
+    tower: currentRoom.tower,
+    room_number: currentRoom.room,
+    bed_type_raw: currentRoom.tipo,
+    status: invStatusQuick,
+    responsable: ($("#f_responsable").value || "").trim(),
+    notes: ($("#f_notas").value || "").trim(),
+
+    sabanas: num("#f_sabanas"),
+    fundas: num("#f_fundas"),
+    protectores_almohada: num("#f_prot_alm"),
+    almohadas: num("#f_almohadas"),
+    duvet: num("#f_duvet"),
+    funda_duvet: num("#f_funda_duvet"),
+    toallas_bano: num("#f_tbano"),
+    toallas_mano: num("#f_tmano"),
+    toallas_faciales: num("#f_tfacial"),
+    tapetes: num("#f_tapetes"),
+
+    telefonos: num("#f_telefonos"),
+    televisores: num("#f_tv"),
+    minibares: num("#f_minibar"),
+    sillon_estado: $("#f_sillon").value,
+    created_at: nowISO()
+  };
+
+  if(!supaReady){
+    // modo local: guardamos en localStorage
+    const key = `kg_inv_local::${roomKey(currentMode, currentRoom.tower, currentRoom.room)}`;
+    const arr = JSON.parse(localStorage.getItem(key) || "[]");
+    arr.unshift(payload);
+    localStorage.setItem(key, JSON.stringify(arr.slice(0, 15)));
+    toast("Guardado local ✅");
+    await loadInventoryHistory(true);
+    return;
+  }
+
+  const { error } = await supabase.from("inventory_entries").insert([payload]);
+  if(error){
+    console.error(error);
+    toast("No se pudo guardar (Supabase). Revisa RLS/tabla/keys.");
+    return;
+  }
+  toast("Guardado en línea ✅");
+  await loadInventoryHistory(true);
+}
+
+async function loadInventoryHistory(silent){
+  if(!currentRoom) return;
+  const box = $("#histBox");
+  box.style.display = "block";
+  box.innerHTML = "";
+
+  if(!supaReady){
+    const key = `kg_inv_local::${roomKey(currentMode, currentRoom.tower, currentRoom.room)}`;
+    const data = JSON.parse(localStorage.getItem(key) || "[]");
+    if(!data.length){
+      box.innerHTML = '<div class="hist-item"><div class="meta">Sin registros</div>Aún no hay capturas para esta habitación.</div>';
+      return;
+    }
+    data.slice(0,10).forEach(r=>{
+      const when = r.created_at ? new Date(r.created_at).toLocaleString('es-MX') : "";
+      const resp = r.responsable ? ` · ${escapeHtml(r.responsable)}` : "";
+      const notes = r.notes ? `<div style="margin-top:6px;color:#dbe6ff">${escapeHtml(r.notes)}</div>` : "";
+      const line = `Sáb:${r.sabanas}  Fund:${r.fundas}  TB:${r.toallas_bano}  TM:${r.toallas_mano}  TF:${r.toallas_faciales}  Tap:${r.tapetes}`;
+      box.insertAdjacentHTML("beforeend", `
+        <div class="hist-item">
+          <div class="meta">${when} · <b>${escapeHtml(r.status||"")}</b>${resp}</div>
+          <div>${escapeHtml(line)}</div>
+          <div style="margin-top:6px;color:#cfe0ff">Tel:${r.telefonos} · TV:${r.televisores} · Mini:${r.minibares} · Sillón:${escapeHtml(r.sillon_estado||"")}</div>
+          ${notes}
+        </div>
+      `);
+    });
+    if(!silent) toast("Historial local 📒");
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("inventory_entries")
+    .select("*")
+    .eq("module", currentMode)
+    .eq("tower", currentRoom.tower)
+    .eq("room_number", currentRoom.room)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  if(error){
+    console.error(error);
+    box.innerHTML = '<div class="hist-item"><div class="meta">Error</div>No se pudo consultar historial (RLS?).</div>';
+    return;
+  }
+  if(!data || !data.length){
+    box.innerHTML = '<div class="hist-item"><div class="meta">Sin registros</div>Aún no hay capturas para esta habitación.</div>';
+    return;
+  }
+  data.forEach(r => {
+    const when = r.created_at ? new Date(r.created_at).toLocaleString('es-MX') : "";
+    const resp = r.responsable ? ` · ${escapeHtml(r.responsable)}` : "";
+    const notes = r.notes ? `<div style="margin-top:6px;color:#dbe6ff">${escapeHtml(r.notes)}</div>` : "";
+    const line = `Sáb:${r.sabanas}  Fund:${r.fundas}  TB:${r.toallas_bano}  TM:${r.toallas_mano}  TF:${r.toallas_faciales}  Tap:${r.tapetes}`;
+    box.insertAdjacentHTML("beforeend", `
+      <div class="hist-item">
+        <div class="meta">${when} · <b>${escapeHtml(r.status||"")}</b>${resp}</div>
+        <div>${escapeHtml(line)}</div>
+        <div style="margin-top:6px;color:#cfe0ff">Tel:${r.telefonos} · TV:${r.televisores} · Mini:${r.minibares} · Sillón:${escapeHtml(r.sillon_estado||"")}</div>
+        ${notes}
+      </div>
+    `);
+  });
+  if(!silent) toast("Historial en línea 📡");
+}
+
+/* =========================
+   BITÁCORA (tickets) por módulo
+   ========================= */
+const TICK_KEY = "kg_tickets_v1";
+
+function loadTicketDB(){
+  try{ return JSON.parse(localStorage.getItem(TICK_KEY) || "{}"); }catch(_){ return {}; }
+}
+function saveTicketDB(db){
+  localStorage.setItem(TICK_KEY, JSON.stringify(db));
+}
+function ticketScopeKey(){
+  // tickets por módulo + habitación
+  if(!currentRoom) return "";
+  return `T::${roomKey(currentMode, currentRoom.tower, currentRoom.room)}`;
+}
+function getTicketsLocal(){
+  const db = loadTicketDB();
+  const k = ticketScopeKey();
+  return db[k] || [];
+}
+function setTicketsLocal(arr){
+  const db = loadTicketDB();
+  const k = ticketScopeKey();
+  db[k] = arr;
+  saveTicketDB(db);
+}
+
+function openLogModal(){
+  if(!currentRoom) return;
+  $("#logSub").textContent = `${currentMode} · ${currentRoom.tower} · Habitación ${currentRoom.room}`;
+  $("#logBackdrop").style.display = "flex";
+  $("#logBackdrop").setAttribute("aria-hidden","false");
+  refreshTicketLists();
+  updateCertifyButtonState();
+}
+function closeLogModal(){
+  $("#logBackdrop").style.display = "none";
+  $("#logBackdrop").setAttribute("aria-hidden","true");
+}
+
+function ticketItemHTML(t){
+  const meta = `${new Date(t.created_at).toLocaleString('es-MX')} · <b>${escapeHtml(t.status)}</b> · ${escapeHtml(t.prio)} · ${escapeHtml(t.area)}`;
+  const files = (t.files||[]).length ? `<div style="margin-top:6px;color:var(--muted);">Adjuntos: ${t.files.map(f=>`<span class="badge">${escapeHtml(f.name)}</span>`).join(" ")}</div>` : "";
+  const doneBtn = t.status==="TERMINADO" ? "" : `<button class="qbtn" data-done="${t.id}">Marcar terminado</button>`;
+  return `
+    <div class="hist-item">
+      <div class="meta">${meta}</div>
+      <div><b>${escapeHtml(t.title||"")}</b></div>
+      <div style="margin-top:6px;color:#dbe6ff">${escapeHtml(t.desc||"")}</div>
+      ${files}
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+        ${doneBtn}
+        <button class="qbtn" data-del="${t.id}">Eliminar</button>
+      </div>
+    </div>
+  `;
+}
+
+function refreshTicketLists(){
+  const all = getTicketsLocal();
+  const m = all.filter(t=>t.area==="MANTTO");
+  const h = all.filter(t=>t.area==="ADL");
+  $("#m_list").innerHTML = m.length ? m.map(ticketItemHTML).join("") : '<div class="hist-item"><div class="meta">Sin tickets</div>Sin pendientes de Mantenimiento.</div>';
+  $("#h_list").innerHTML = h.length ? h.map(ticketItemHTML).join("") : '<div class="hist-item"><div class="meta">Sin tickets</div>Sin pendientes de Ama de Llaves.</div>';
+
+  // Hook actions
+  $$("#m_list .qbtn, #h_list .qbtn").forEach(b=>{
+    if(b.dataset.done){
+      b.addEventListener("click", ()=> markTicketDone(b.dataset.done));
+    }
+    if(b.dataset.del){
+      b.addEventListener("click", ()=> deleteTicket(b.dataset.del));
+    }
+  });
+}
+
+function addTicket(area){
+  if(!currentRoom) return;
+
+  const isM = area==="MANTTO";
+  const title = (isM ? $("#m_title").value : $("#h_title").value).trim();
+  const desc  = (isM ? $("#m_desc").value : $("#h_desc").value).trim();
+  const prio  = (isM ? $("#m_prio").value : $("#h_prio").value);
+  const status= (isM ? $("#m_status").value : $("#h_status").value);
+  const filesInput = isM ? $("#m_files") : $("#h_files");
+
+  if(!title && !desc){
+    toast("Escribe al menos un título o detalle.");
+    return;
+  }
+
+  const files = Array.from(filesInput.files || []).map(f=>({ name: f.name, size: f.size, type: f.type }));
+  const all = getTicketsLocal();
+  const ticket = {
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random()),
+    area: isM ? "MANTTO" : "ADL",
+    title: title || "(Sin título)",
+    desc,
+    prio,
+    status,
+    files,
+    created_at: nowISO()
+  };
+  all.unshift(ticket);
+  setTicketsLocal(all.slice(0, 60));
+
+  // reset inputs (no borramos prioridad/estatus)
+  if(isM){ $("#m_title").value=""; $("#m_desc").value=""; $("#m_files").value=""; }
+  else { $("#h_title").value=""; $("#h_desc").value=""; $("#h_files").value=""; }
+
+  refreshTicketLists();
+  updateCertifyButtonState();
+  toast("Ticket agregado ✅");
+}
+
+function markTicketDone(id){
+  const all = getTicketsLocal();
+  const t = all.find(x=>x.id===id);
+  if(!t) return;
+  t.status = "TERMINADO";
+  setTicketsLocal(all);
+  refreshTicketLists();
+  updateCertifyButtonState();
+  toast("Marcado como terminado ✅");
+}
+
+function deleteTicket(id){
+  const all = getTicketsLocal().filter(x=>x.id!==id);
+  setTicketsLocal(all);
+  refreshTicketLists();
+  updateCertifyButtonState();
+  toast("Ticket eliminado");
+}
+
+function hasOpenTickets(){
+  const all = getTicketsLocal();
+  return all.some(t=>t.status==="ABIERTO" || t.status==="EN_PROCESO");
+}
+
+function updateCertifyButtonState(){
+  const btn = $("#btnCertify");
+  if(!btn || currentMode==="HOME" || !currentRoom) return;
+  const open = hasOpenTickets();
+  btn.disabled = open;
+  btn.style.opacity = open ? ".55" : "1";
+  btn.style.cursor = open ? "not-allowed" : "pointer";
+}
+
+function certifyGreen(){
+  if(!currentRoom) return;
+  if(hasOpenTickets()){
+    toast("Aún hay pendientes ABIERTO/EN PROCESO.");
+    return;
+  }
+  // Certificar a VERDE
+  // En MPLP se puede marcar sub LP si checkbox
+  setSemFromUI("VERDE");
+  toast("Habitación certificada a VERDE ✅");
+}
+
+/* =========================
+   CSV room export (del modal)
+   ========================= */
+function exportCSVRoom(){
+  if(!currentRoom) return;
+  const headers = [
+    "module","tower","room_number","bed_type_raw","quick_status","responsable","notes",
+    "sabanas","fundas","protectores_almohada","almohadas","duvet","funda_duvet",
+    "toallas_bano","toallas_mano","toallas_faciales","tapetes",
+    "telefonos","televisores","minibares","sillon_estado"
+  ];
+  const row = [
+    currentMode,
+    currentRoom.tower,
+    currentRoom.room,
+    currentRoom.tipo,
+    invStatusQuick,
+    ($("#f_responsable").value||"").trim(),
+    ($("#f_notas").value||"").trim(),
+    num("#f_sabanas"), num("#f_fundas"), num("#f_prot_alm"), num("#f_almohadas"), num("#f_duvet"), num("#f_funda_duvet"),
+    num("#f_tbano"), num("#f_tmano"), num("#f_tfacial"), num("#f_tapetes"),
+    num("#f_telefonos"), num("#f_tv"), num("#f_minibar"), $("#f_sillon").value
+  ];
+  const csv = headers.join(",") + "\\n" + row.map(csvEscape).join(",");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${currentMode}_${currentRoom.tower}_${currentRoom.room}_captura.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast("CSV generado 📄");
+}
+function csvEscape(v){
+  const s = String(v ?? "");
+  if(/[",\\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+  return s;
+}
+
+
+/* =========================
+   JOLLA: categorías + disponibilidad (LOCAL)
+   ========================= */
+const JOLLA_META_KEY = "KG_JOLLA_META_V1";
+const JOLLA_CATS = {
+  SIN_ASIGNAR: "Sin asignar",
+  USO_CASA: "Uso casa",
+  PRACTICANTES: "Practicantes",
+  BODEGAS: "Bodegas",
+};
+let jollaSelectedRoom = null;
+
+function loadJollaMeta(){
+  try{ return JSON.parse(localStorage.getItem(JOLLA_META_KEY) || "{}"); }
+  catch(e){ return {}; }
+}
+function saveJollaMeta(meta){
+  localStorage.setItem(JOLLA_META_KEY, JSON.stringify(meta||{}));
+}
+function getJollaRoomMeta(room){
+  const meta = loadJollaMeta();
+  return meta[room] || { cat:"SIN_ASIGNAR", avail:"NO" };
+}
+function setJollaRoomMeta(room, data){
+  const meta = loadJollaMeta();
+  meta[room] = { cat: data.cat || "SIN_ASIGNAR", avail: data.avail || "NO" };
+  saveJollaMeta(meta);
+}
+function computeJollaCounts(){
+  const rooms = Array.from(document.querySelectorAll('.torre.jolla .hab')).map(b=>roomNum(b)).filter(Boolean);
+  const meta = loadJollaMeta();
+  const counts = { total: rooms.length, disp:0, nodisp:0, uso:0, prac:0, bod:0 };
+  rooms.forEach(r=>{
+    const m = meta[r] || {cat:"SIN_ASIGNAR", avail:"NO"};
+    if(m.avail==="SI") counts.disp++; else counts.nodisp++;
+    if(m.cat==="USO_CASA") counts.uso++;
+    if(m.cat==="PRACTICANTES") counts.prac++;
+    if(m.cat==="BODEGAS") counts.bod++;
+  });
+  return counts;
+}
+function paintJollaBadges(){
+  const meta = loadJollaMeta();
+  document.querySelectorAll('.torre.jolla .hab').forEach(b=>{
+    const r = roomNum(b);
+    if(!r) return;
+    const m = meta[r] || {cat:"SIN_ASIGNAR", avail:"NO"};
+    let badge = "";
+    if(m.cat==="USO_CASA") badge = "Casa";
+    else if(m.cat==="PRACTICANTES") badge = "Prac";
+    else if(m.cat==="BODEGAS") badge = "Bod";
+    else badge = "";
+    if(badge){
+      b.classList.add("jolla-flag");
+      b.dataset.jolla = badge;
+    } else {
+      b.classList.remove("jolla-flag");
+      b.removeAttribute("data-jolla");
+    }
+    // Disponible / No disponible (borde)
+    b.style.boxShadow = m.avail==="SI"
+      ? "0 10px 24px rgba(56, 200, 120, .18), inset 0 0 0 2px rgba(56, 200, 120, .25)"
+      : "0 10px 24px rgba(0,0,0,.25), inset 0 0 0 2px rgba(255,255,255,.10)";
+  });
+}
+function updateJollaSide(){
+  if(currentMode!=="JOLLA") return;
+  const c = computeJollaCounts();
+  if($("#jTotal")) $("#jTotal").textContent = c.total;
+  if($("#jDisp")) $("#jDisp").textContent = c.disp;
+  if($("#jNoDisp")) $("#jNoDisp").textContent = c.nodisp;
+  if($("#jUso")) $("#jUso").textContent = c.uso;
+  if($("#jPrac")) $("#jPrac").textContent = c.prac;
+  if($("#jBod")) $("#jBod").textContent = c.bod;
+  paintJollaBadges();
+}
+function openJollaEditor(room){
+  jollaSelectedRoom = room;
+  if($("#jRoomSel")) $("#jRoomSel").textContent = room || "—";
+  const m = room ? getJollaRoomMeta(room) : {cat:"SIN_ASIGNAR", avail:"NO"};
+  if($("#jCat")) $("#jCat").value = m.cat || "SIN_ASIGNAR";
+  if($("#jAvail")) $("#jAvail").value = m.avail || "NO";
+}
+
+/* =========================
+   INIT
+   ========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  // Tabs
+  $$(".tab").forEach(t => t.addEventListener("click", ()=> setMode(t.dataset.mode)));
+  $$(".home-btn").forEach(b => b.addEventListener("click", ()=> setMode(b.dataset.go)));
+
+  // Click rooms -> open modal (solo si no es HOME)
+  $$(".hab").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if(currentMode==="HOME"){
+        // desde home no abrimos habitación
+        return;
+      }
+      const obj = { tower: inferTower(btn), room: roomNum(btn), tipo: roomTipo(btn) };
+      if(!obj.room) return;
+      if(currentMode==="JOLLA" && obj.tower==="JOLLA"){ openJollaEditor(obj.room); updateJollaSide(); updateJollaPulidoKPI(); return; }
+      if(currentMode==="PULIDAS" && obj.tower!=="JOLLA"){ openPulidasEditor({tower: obj.tower, room: obj.room}); updatePulidasSide(); return; }
+      openInvModal(obj);
+    });
+  });
+
+  // Inventory modal close
+  $("#invClose").addEventListener("click", closeInvModal);
+  $("#invBackdrop").addEventListener("click", (e)=>{ if(e.target.id==="invBackdrop") closeInvModal(); });
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && $("#invBackdrop").style.display==="flex") closeInvModal(); });
+
+  
+  // Pulidas modal close + actions
+  $("#pulClose").addEventListener("click", closePulidasEditor);
+  $("#pulBackdrop").addEventListener("click", (e)=>{ if(e.target.id==="pulBackdrop") closePulidasEditor(); });
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && $("#pulBackdrop").style.display==="flex") closePulidasEditor(); });
+
+
+  // Auto-fecha + auto-guardado rápido al marcar Pulido ✓
+  $("#pulDone").addEventListener("change", ()=>{
+    if(!pulActive) return;
+
+    const done = $("#pulDone").checked;
+
+    if(done){
+      if(!$("#pulDate").value) $("#pulDate").value = todayISO();
+      $("#pulPct").value = 100;
+    } else {
+      $("#pulPct").value = 0;
+    }
+
+    const pct = done ? 100 : clampInt(parseInt($("#pulPct").value||"0",10),0,100);
+    const date = $("#pulDate").value || "";
+    const notes = ($("#pulNotes").value||"").trim();
+
+    setPulido(pulActive.tower, pulActive.room, { pct, date, notes });
+
+    applyPulidasPaint();
+    updatePulidasSide();
+    updateHomeKPIs();
+    updateJollaPulidoKPI();
+  });
+  $("#pulClear").addEventListener("click", ()=>{
+    if(!pulActive) return;
+    $("#pulDone").checked = false;
+    $("#pulDate").value = "";
+    $("#pulPct").value = 0;
+    $("#pulNotes").value = "";
+  });
+
+  $("#pulSave").addEventListener("click", ()=>{
+    if(!pulActive) return;
+    const done = $("#pulDone").checked;
+    let pct = clampInt(parseInt($("#pulPct").value||"0",10),0,100);
+    const date = $("#pulDate").value || "";
+    const notes = ($("#pulNotes").value||"").trim();
+
+    // Si marca Pulido ✓ y % < 100, lo subimos a 100 (porque para el KPI cuenta como pulido)
+    if(done) pct = 100;
+    if(!done && pct>=100) pct = 0;
+
+    // Si marca pulido y no hay fecha, ponemos hoy
+    let finalDate = date;
+    if(done && !finalDate){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      finalDate = `${yyyy}-${mm}-${dd}`;
+      $("#pulDate").value = finalDate;
+    }
+
+    setPulido(pulActive.tower, pulActive.room, { pct, date: finalDate, notes });
+
+    // repaint
+    applyPulidasPaint();
+    updatePulidasSide();
+    updateHomeKPIs();
+    closePulidasEditor();
+  });
+// Quick status
+  $("#statusQuick").addEventListener("click", (e)=>{
+    const b = e.target.closest(".qbtn");
+    if(!b) return;
+    invStatusQuick = b.dataset.status;
+    $$("#statusQuick .qbtn").forEach(x=>x.classList.toggle("active", x===b));
+  });
+
+  // Inventory actions
+  $("#btnSave").addEventListener("click", saveInventoryEntry);
+  $("#btnHist").addEventListener("click", ()=>loadInventoryHistory(false));
+  $("#btnCSV").addEventListener("click", exportCSVRoom);
+  $("#btnLog").addEventListener("click", ()=>{
+    closeInvModal();
+    openLogModal();
+  });
+
+  // Bitácora modal actions
+  $("#logClose").addEventListener("click", closeLogModal);
+  $("#logBackdrop").addEventListener("click", (e)=>{ if(e.target.id==="logBackdrop") closeLogModal(); });
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && $("#logBackdrop").style.display==="flex") closeLogModal(); });
+
+  $("#m_add").addEventListener("click", ()=>addTicket("MANTTO"));
+  $("#h_add").addEventListener("click", ()=>addTicket("ADL"));
+  $("#m_refresh").addEventListener("click", refreshTicketLists);
+  $("#h_refresh").addEventListener("click", refreshTicketLists);
+
+  $("#btnBackToInv").addEventListener("click", ()=>{
+    closeLogModal();
+    // re-open inventory modal for same room
+    if(currentRoom) openInvModal(currentRoom);
+  });
+
+  $("#btnCertify").addEventListener("click", certifyGreen);
+
+  // Inject semáforo controls into inventory modal (header area)
+  injectSemControls();
+
+  // Start in HOME
+  setMode("HOME");
+});
+
+function injectSemControls(){
+  // Insert a small semáforo control block inside the inventory modal, before the quick status row.
+  const quick = $("#statusQuick");
+  if(!quick) return;
+
+  const wrap = document.createElement("div");
+  wrap.style.display="flex";
+  wrap.style.flexWrap="wrap";
+  wrap.style.gap="8px";
+  wrap.style.margin="10px 0 8px";
+  wrap.innerHTML = `
+    <button class="qbtn" id="semaRed">🔴 Rojo</button>
+    <button class="qbtn" id="semaYellow">🟡 Amarillo</button>
+    <button class="qbtn" id="semaGreen">🟢 Verde</button>
+    <label class="badge" id="lpWrap" style="display:none;gap:8px;cursor:pointer;">
+      <input type="checkbox" id="chkLP" style="accent-color:#7b8f3f;"> LP rentable
+    </label>
+  `;
+  quick.parentElement.insertBefore(wrap, quick);
+
+  $("#semaRed").addEventListener("click", ()=>setSemFromUI("ROJO"));
+  $("#semaYellow").addEventListener("click", ()=>setSemFromUI("AMARILLO"));
+  $("#semaGreen").addEventListener("click", ()=>setSemFromUI("VERDE"));
+
+  // show LP checkbox only in MPLP
+  const obs = new MutationObserver(()=>{ 
+    const lp = $("#lpWrap");
+    if(lp) lp.style.display = (currentMode==="MPLP") ? "inline-flex" : "none";
+  });
+  obs.observe(document.body, { attributes:true, childList:false, subtree:false });
+}
+
+/* Ensure KPIs reflect mode changes even if no interaction */
+setInterval(()=>{ if(currentMode==="HOME") updateHomeKPIs(); }, 5000);
+</script>
+
+
+
+
+<!-- Modal PULIDAS (edición por habitación) -->
+<div class="modal-backdrop" id="pulBackdrop" aria-hidden="true" style="display:none;">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pulTitle">
+    <header>
+      <div>
+        <h2 id="pulTitle">Pulidas · Control por Habitación</h2>
+        <div class="subline" id="pulSub">—</div>
+      </div>
+      <button class="close-btn" id="pulClose">Cerrar ✕</button>
+    </header>
+
+    <div class="grid-2">
+      <section class="card">
+        <h3>Registro</h3>
+        <div class="fields">
+          <div class="field" style="grid-column:1/-1;">
+            <label>Estado de pulido</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="checkbox" id="pulDone" style="transform:scale(1.2);">
+              <span class="mini">Marcar como <b>Pulido ✓</b> (cuenta para el % de avance)</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Fecha de intervención</label>
+            <input type="date" id="pulDate">
+          </div>
+
+          <div class="field">
+            <label>% (opcional)</label>
+            <input type="number" min="0" max="100" id="pulPct" value="0">
+          </div>
+
+          <div class="field" style="grid-column:1/-1;">
+            <label>Notas (opcional)</label>
+            <textarea id="pulNotes" rows="4" placeholder="Ej: Pulido de cromos, sellado de silicón, cambio de cortina..."></textarea>
+          </div>
+
+          <div class="actions" style="grid-column:1/-1;">
+            <button class="btn" id="pulClear" type="button">Limpiar</button>
+            <button class="btn primary" id="pulSave" type="button">Guardar</button>
+          </div>
+
+          <div class="jolla-note" style="grid-column:1/-1;">
+            Nota: el % por torre se calcula por habitaciones con Pulido ✓. Si capturas % distinto de 0/100, se guarda como referencia.
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Vista rápida</h3>
+        <div class="mini" id="pulInfo">
+          Selecciona una habitación en modo <b>PULIDAS</b> para registrar su avance.
+        </div>
+        <div class="divider"></div>
+        <div class="mini">
+          <b>Regla:</b> todo inicia en ROJO. Conforme pulas, marcas Pulido ✓ y se reflejará en el panel de resumen.
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Panel lateral JOLLA (solo visible en pestaña JOLLA) -->
+<aside id="jollaSide" aria-label="Panel Jolla">
+  <div class="side-h">
+    <div class="t">JOLLA · Control de uso</div>
+    <div class="s">Conteo por categoría y disponibilidad. (Se guarda localmente por ahora)</div>
+  
+    <div style="margin-top:10px;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.03);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="mini">Pulido (JOLLA)</div>
+        <div style="font-weight:900;"><span id="jollaPulidoPct">0</span>%</div>
+      </div>
+      <div style="height:8px"></div>
+      <div class="bar" style="height:10px;"><i id="jollaPulidoBar" style="width:0%;"></i></div>
+    </div>
+</div>
+  <div class="side-b">
+    <div class="jolla-kpis">
+      <div class="jolla-kpi"><div class="k">Total</div><div class="v" id="jTotal">0</div></div>
+      <div class="jolla-kpi"><div class="k">Disponibles</div><div class="v" id="jDisp">0</div></div>
+      <div class="jolla-kpi"><div class="k">No disponibles</div><div class="v" id="jNoDisp">0</div></div>
+      <div class="jolla-kpi"><div class="k">Uso casa</div><div class="v" id="jUso">0</div></div>
+      <div class="jolla-kpi"><div class="k">Practicantes</div><div class="v" id="jPrac">0</div></div>
+      <div class="jolla-kpi"><div class="k">Bodegas</div><div class="v" id="jBod">0</div></div>
+    </div>
+
+    <div class="jolla-editor">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div>
+          <div style="font-weight:900;letter-spacing:.3px;">Habitación seleccionada</div>
+          <div style="opacity:.85;font-size:12px;margin-top:2px;">Toca una habitación del croquis para asignar.</div>
+        </div>
+        <div style="font-weight:900;font-size:20px;" id="jRoomSel">—</div>
+      </div>
+
+      <div class="row">
+        <label>Categoría</label>
+        <select id="jCat">
+          <option value="SIN_ASIGNAR">Sin asignar</option>
+          <option value="USO_CASA">Uso casa</option>
+          <option value="PRACTICANTES">Practicantes</option>
+          <option value="BODEGAS">Bodegas</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>Disponib.</label>
+        <select id="jAvail">
+          <option value="NO">No disponible</option>
+          <option value="SI">Disponible</option>
+        </select>
+      </div>
+
+      <div class="btnbar">
+        <button class="btn" id="jClear" type="button">Limpiar</button>
+        <button class="btn primary" id="jSave" type="button">Guardar</button>
+      </div>
+
+      <div class="jolla-note">
+        Tip: en JOLLA el croquis funciona como tablero. El estado se usa para tu conteo; después lo conectamos a Supabase.
+      </div>
+    </div>
+  </div>
+</aside>
+<!-- Panel lateral PULIDAS (solo visible en pestaña PULIDAS) -->
+<aside id="pulidasSide" aria-label="Panel Pulidas">
+  <div class="side-h">
+    <div class="t">PULIDAS · Avance</div>
+    <div class="s">
+      Marca el pulido <b>desde la habitación</b>. Aquí solo ves el <b>resumen</b> por torre y general.
+      <br><span class="mini">Cálculo: % de habitaciones con Pulido ✓ (por torre) y total.</span>
+    </div>
+  </div>
+
+  <div class="side-b">
+    <table class="tbl" aria-label="Resumen de avance Pulidas">
+      <thead>
+        <tr>
+          <th style="width:70%;">Concepto</th>
+          <th style="width:30%; text-align:right;">%</th>
+        </tr>
+      </thead>
+      <tbody id="pSumBody"></tbody>
+    </table>
+
+    <div class="jolla-note" style="margin-top:10px;">
+      Tip: entra a una habitación en modo <b>PULIDAS</b> para registrar Pulido ✓ y fecha de intervención.
+    </div>
+  </div>
+</aside>
+>
+
+</body>
+</html>
