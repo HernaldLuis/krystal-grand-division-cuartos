@@ -1,1385 +1,352 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mapa de Habitaciones · Krystal Grand</title>
-<style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Carta de Santa · Equipo y Líderes</title>
+  <style>
     :root{
-    --bg: #0b141c;
-    --card: #111c26;
-    --header: #0f3550;
-
-    /* Paleta azul perlado + verde olivo perlado */
-    --border-soft: rgba(255,255,255,.16);
-    --txt: #f4f7ff;
-    --muted:#a9b6d3;
-}
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-        background:
-          radial-gradient(900px 500px at 10% 0%, rgba(31,151,168,.25), transparent 55%),
-          radial-gradient(900px 600px at 90% 10%, rgba(200,122,42,.25), transparent 60%),
-          var(--bg);
-        color:var(--txt);
-        padding:18px;
+      --bg1:#071a33;
+      --bg2:#0b2a52;
+      --ink:#2b1f12;
+      --paper:#f3e6c8;
+      --paper2:#e8d7b1;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
     }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(900px 500px at 80% 0%, rgba(255,255,255,.05), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+
+    /* Fondo con estrellas suaves */
+    .stars{
+      position:fixed; inset:0;
+      pointer-events:none;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,.55), transparent 55%),
+        radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,.45), transparent 55%),
+        radial-gradient(1px 1px at 55% 35%, rgba(255,255,255,.5), transparent 55%),
+        radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,.45), transparent 55%),
+        radial-gradient(1px 1px at 90% 15%, rgba(255,255,255,.4), transparent 55%);
+      opacity:.55;
+      mix-blend-mode:screen;
+      z-index:0;
+    }
+
+    /* Santa volando (detrás del pergamino) */
+    .santa-layer{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:1; /* detrás del pergamino */
+      overflow:hidden;
+    }
+    .santa{
+      position:absolute;
+      top: 10vh;
+      left: -30vw;
+      width: min(520px, 70vw);
+      opacity: .92;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.35));
+      animation: fly 18s linear infinite, bob 2.8s ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes fly{
+      0%   { transform: translateX(-35vw) translateY(0) scale(1); }
+      100% { transform: translateX(145vw) translateY(0) scale(1); }
+    }
+    @keyframes bob{
+      0%,100% { margin-top: 0px; }
+      50%     { margin-top: 14px; }
+    }
+
+    /* Nieve (más abundante) */
+    .snow{
+      position:fixed; inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:4; /* encima de todo */
+    }
+    .flake{
+      position:absolute;
+      top:-12vh;
+      border-radius:50%;
+      background:rgba(255,255,255,.9);
+      filter: blur(.25px);
+      animation: fall linear infinite, sway ease-in-out infinite;
+      will-change: transform;
+    }
+    @keyframes fall{ to{ transform: translateY(125vh); } }
+    @keyframes sway{
+      0%,100%{ margin-left:0 }
+      50%{ margin-left:50px }
+    }
+
+    /* Contenedor */
+    .wrap{
+      min-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 32px 16px 56px;
+      position:relative;
+      z-index:3; /* arriba de santa */
+    }
+
+    /* Pergamino */
+    .scroll{
+      width:min(920px, 96vw);
+      background:
+        radial-gradient(900px 260px at 50% 10%, rgba(255,255,255,.22), transparent 60%),
+        radial-gradient(650px 240px at 50% 90%, rgba(0,0,0,.08), transparent 65%),
+        linear-gradient(180deg, var(--paper), var(--paper2));
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      position:relative;
+      padding: 42px 26px;
+      transform-origin: center;
+      animation: open 900ms cubic-bezier(.2,.9,.2,1) both;
+    }
+    @keyframes open{
+      from{ transform: scale(.92) translateY(12px); opacity:0 }
+      to{ transform: scale(1) translateY(0); opacity:1 }
+    }
+
+    /* Bordes envejecidos */
+    .scroll:before, .scroll:after{
+      content:"";
+      position:absolute;
+      inset: 10px;
+      border-radius: 22px;
+      border: 2px solid rgba(120,80,30,.35);
+      box-shadow:
+        inset 0 0 0 2px rgba(255,255,255,.12),
+        inset 0 0 22px rgba(80,40,10,.18);
+      pointer-events:none;
+    }
+    .scroll:after{
+      inset: 22px;
+      border: 1px dashed rgba(120,80,30,.25);
+      opacity:.9;
+    }
+
+    /* Barras del pergamino (arriba/abajo) */
+    .rod{
+      position:absolute;
+      left: 18px;
+      right: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(95,55,18,.85), rgba(170,110,45,.92), rgba(95,55,18,.85));
+      box-shadow: 0 8px 22px rgba(0,0,0,.18);
+      opacity:.95;
+    }
+    .rod.top{ top: 14px; }
+    .rod.bottom{ bottom: 14px; }
+
+    header{
+      text-align:center;
+      padding: 6px 10px 18px;
+    }
+
+    /* Logo Krystal */
+    .brand{
+      display:flex;
+      justify-content:center;
+      margin: 2px 0 10px;
+    }
+    .brand img{
+      width: min(210px, 55vw);
+      height:auto;
+      border-radius: 10px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    }
+
+    .seal{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      color:#fff;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:12px;
+      padding:10px 14px;
+      border-radius:999px;
+      background: linear-gradient(180deg, rgba(215,180,106,.95), rgba(165,120,55,.95));
+      box-shadow: 0 10px 26px rgba(0,0,0,.25);
+    }
+    .seal .dot{
+      width:10px; height:10px; border-radius:50%;
+      background:rgba(255,255,255,.9);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.12);
+    }
+
     h1{
-        text-align:center;
-        margin-bottom:14px;
-        font-size:26px;
-        letter-spacing:.04em;
+      margin: 18px 0 8px;
+      font-size: clamp(22px, 3.2vw, 34px);
+      font-weight: 800;
+      color:#2a1b0f;
     }
     .sub{
-        text-align:center;
-        font-size:13px;
-        color:var(--muted);
-        margin-bottom:18px;
-    }
-    .layout{
-        display:flex;
-        gap:12px;              /* cerca, pero sin tocarse */
-        align-items:flex-start;
-        justify-content:flex-start; /* evita que se metan debajo del modal */
-        flex-wrap:wrap;
-        padding: 16px 340px 28px 12px; /* deja espacio para el modal */
-        box-sizing:border-box;
-        width: 100%;
-        max-width: 1200px;
-        margin: 0 auto;        /* estética centrada */
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: rgba(43,31,18,.75);
+      font-size: 14px;
     }
 
-/* Reservamos espacio para el modal fijo (solo en pantallas medianas/grandes) */
-@media (min-width: 980px){
-  .layout{
-    padding-right: 330px; /* reserva espacio para el modal sin encimarse */
-    max-width: 100%;
-  }
-}
-
-
-/* En pantallas pequeñas, el modal baja para no estorbar */
-@media (max-width: 979px){
-  .avance-modal{
-    overflow:hidden;
-
-    right: 12px;
-    left: 12px;
-    width: auto;
-    top: auto;
-    bottom: 12px;
-  }
-}
-    .torre{
-        background:var(--card);
-        border-radius:18px;
-        border:1px solid var(--border-soft);
-        min-width:360px;
-        padding-bottom:10px;
-        box-shadow:0 14px 30px rgba(0,0,0,.45);
+    .letter{
+      padding: 6px 14px 10px;
+      line-height: 1.65;
+      font-size: clamp(16px, 1.6vw, 18px);
+      white-space: pre-wrap;
     }
-    .torre-header{
-        background:var(--header);
-        border-radius:18px 18px 0 0;
-        padding:10px 14px;
-        text-align:center;
-        font-weight:700;
-        font-size:18px;
-        letter-spacing:.05em;
-        text-transform:uppercase;
-    }
-    .torre-sub{
-        text-align:center;
-        font-size:11px;
-        color:var(--muted);
-        padding:4px 10px 8px;
-        border-bottom:1px dashed var(--border-soft);
-        min-height:26px;
-    }
-    .piso{
-        padding:10px 10px 4px;
-        border-bottom:1px dashed rgba(255,255,255,.09);
-    }
-    .piso:last-child{
-        border-bottom:none;
-    }
-    .piso-titulo{
-        font-size:13px;
-        font-weight:600;
-        margin-bottom:6px;
-        color:#d6e6ff;
-    }
-    .fila{
-        display:grid;
-        grid-template-columns: repeat(18, 70px); /* 01 a 18 por fila */
-        gap:6px;
-        align-items:start;
-        justify-content:start;
-    }
-    .hab{
-        width:70px;
-        height:50px;
-        border-radius:10px;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        font-size:11px;
-        border:1px solid rgba(0,0,0,.18);
-        box-shadow:0 2px 4px rgba(0,0,0,.45);
-        flex:0 0 auto;
-    }
-    .kg{ background: linear-gradient(180deg, #5fa8d3, #3f7fa6); color:#ffffff; box-shadow: inset 0 -2px 0 rgba(255,255,255,.25); }
-    .mt{ background: linear-gradient(180deg, #7b8f3f, #556b2f); color:#f6f7f2; box-shadow: inset 0 -2px 0 rgba(255,255,255,.22); }
-
-    .num{font-weight:700;font-size:13px;line-height:1.1;}
-    .tipo{opacity:.9;margin-top:1px; font-size:11px;}
-
-    .placeholder{
-        padding:18px 12px 22px;
-        font-size:12px;
-        color:var(--muted);
-        text-align:center;
-    }
-
-    /* Ajustes SOLO para UNIQUE */
-    .torre.unique .hab{
-        width:58px;
-        height:44px;
-        border-radius:10px;
-    }
-    .torre.unique .num{ font-size:12px; }
-    .torre.unique .tipo{ font-size:10px; }
-
-    /* Cada piso en UNIQUE: 2 filas máximas, 18 columnas.
-       Los primeros 18 van arriba; el resto se va abajo empezando bajo el 1. */
-    .torre.unique .fila{
-        display:grid;
-        grid-template-columns: repeat(18, 70px); /* 01 a 18 por fila */
-        gap:6px;
-        align-items:start;
-        justify-content:start;
-    }
-
-    /* Evitar que cualquier torre desborde visualmente */
-    .torre{ overflow:hidden; }
-
-
-    @media (max-width: 1200px){
-        .torre{ min-width: 340px; }
-        .torre.unique .fila{
-        display:grid;
-        grid-template-columns: repeat(18, 70px); /* 01 a 18 por fila */
-        gap:6px;
-        align-items:start;
-        justify-content:start;
-    } /* en pantallas chicas, compacta */
-    }
-
-
-    .contadores{
-        margin-top:6px;
-        font-size:12px;
-        color:#e6f0ff;
-        opacity:.9;
-    }
-
-
-    /* Encabezado */
-    .topbar{
-        max-width: 1400px;
-        margin: 0 auto 18px auto;
-        padding: 16px 18px;
-        border-radius: 18px;
-        border: 1px solid var(--border-soft);
-        background: linear-gradient(180deg, rgba(16,25,38,.92), rgba(16,25,38,.68));
-        box-shadow:0 14px 30px rgba(0,0,0,.45);
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:14px;
-        flex-wrap:wrap;
-    }
-    .brand-title{
-        font-weight:800;
-        letter-spacing:.04em;
-        font-size:22px;
-        line-height:1.1;
-    }
-    .brand-sub{
-        margin-top:4px;
-        font-size:13px;
-        color:var(--muted);
-        letter-spacing:.06em;
-        text-transform:uppercase;
-    }
-    .pill{
-        padding:8px 12px;
-        border-radius:999px;
-        border:1px solid rgba(255,255,255,.14);
-        background: rgba(7,16,25,.5);
-        font-size:12px;
-        letter-spacing:.08em;
-        text-transform:uppercase;
-        color:#e8f1ff;
-        white-space:nowrap;
-    }
-
-    /* Animación suave de entrada (discreta) */
-    .topbar{ animation: fadeInUp .55s ease-out both; }
-    @keyframes fadeInUp{
-        from{ opacity:0; transform: translateY(8px); }
-        to{ opacity:1; transform: translateY(0); }
-    }
-
-    /* Ajuste general */
-    body{ padding-top: 14px; }
-
-
-    .brand{
-        display:flex;
-        align-items:center;
-        gap:14px;
-    }
-    .brand-logo{
-        height:52px;
-        width:auto;
-        border-radius:10px;
-        object-fit:contain;
-        box-shadow:0 4px 10px rgba(0,0,0,.35);
-        background:#fff;
-        padding:4px;
-    }
-    .brand-text{
-        display:flex;
-        flex-direction:column;
-    }
-
-
-    /* Footer firma */
-    footer.firma{
-        max-width:1400px;
-        margin:28px auto 8px;
-        padding-top:14px;
-        border-top:1px solid rgba(255,255,255,.12);
-        text-align:center;
-        font-size:12px;
-        color:#a9b6d3;
-        line-height:1.5;
-    }
-
-
-.hab{
-    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
-}
-.hab:hover{
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(0,0,0,.35);
-    filter: brightness(1.08);
-}
-
-
-    .datetime{
-        font-size:12px;
-        color:#e6f0ff;
-        opacity:.85;
-        letter-spacing:.06em;
-        white-space:nowrap;
-    }
-
-
-    /* Fecha y hora – estilo destacado */
-    .datetime{
-        font-size:14px;
-        color:#eef4ff;
-        opacity:.95;
-        letter-spacing:.12em;
-        white-space:nowrap;
-        display:flex;
-        align-items:center;
-        gap:10px;
-        font-weight:600;
-        font-variant-numeric: tabular-nums;
-    }
-    .datetime .date{
-        font-size:13px;
-        opacity:.9;
-    }
-    .datetime .time{
-        font-size:18px;
-        font-weight:700;
-        letter-spacing:.08em;
-    }
-
-
-    /* Encabezado fijo (sticky) */
-    .topbar{
-        position: sticky;
-        top: 12px;
-        z-index: 999;
-        backdrop-filter: blur(10px);
-    }
-
-
-    .contenedor{
-        padding-top: 6px;
-    }
-
-
-/* === PULIDOS (color del cuadro como tal) === */
-.hab.no-pulida{
-  background: linear-gradient(145deg, #9b1111, #e23b3b) !important; /* rojo aperlado */
-  color:#fff !important;
-}
-.hab.pulida{
-  background: linear-gradient(145deg, #1f7f5c, #55d6a3) !important; /* verde aperlado */
-  color:#fff !important;
-}
-
-/* === MODAL FIJO · AVANCE DE PULIDOS === */
-.avance-modal{
-  position: fixed;
-  right: 16px;
-  top: 120px; /* debajo del topbar sticky */
-  width: 290px;
-  z-index: 1005;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: linear-gradient(180deg, rgba(16,25,38,.92), rgba(16,25,38,.72));
-  box-shadow: 0 18px 40px rgba(0,0,0,.55);
-  padding: 14px 14px 12px 14px;
-  backdrop-filter: blur(10px);
-}
-.avance-modal h3{
-  margin: 0 0 10px 0;
-  font-size: 14px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  opacity:.95;
-}
-.av-item{ margin: 10px 0; }
-.av-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  font-size: 13px;
-}
-.av-label{ opacity:.92; }
-.av-pct{ font-weight:700; }
-.av-bar{
-  height: 10px;
-  border-radius: 999px;
-  margin-top: 6px;
-  background: rgba(255,255,255,.10);
-  overflow:hidden;
-}
-.av-fill{
-  height:100%;
-  width:0%;
-  border-radius: 999px;
-  background: linear-gradient(145deg, #1f7f5c, #55d6a3);
-  transition: width .35s ease;
-}
-.av-note{
-  margin-top: 10px;
-  font-size: 11px;
-  opacity:.75;
-  line-height: 1.25;
-}
-@media (max-width: 980px){
-  .avance-modal{
-    position: static;
-    width: auto;
-    margin: 0 12px 12px 12px;
-    top:auto; right:auto;
-  }
-}
-
-    /* --- Gráfica tipo pastel en modal --- */
-    .pie-section{
-      margin-top:12px;
-      padding-top:10px;
-      border-top:1px solid rgba(255,255,255,.10);
-    }
-    .pie-title{
-      font-size:12px;
-      opacity:.9;
-      margin-bottom:8px;
-      letter-spacing:.2px;
-    }
-    .pie-row{
+    .signature{
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(120,80,30,.25);
       display:flex;
-      gap:12px;
-      align-items:center;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:18px;
       flex-wrap:wrap;
     }
-    #piePulidos{
-      flex:0 0 180px;
-      width:180px;
-      height:180px;
-      border-radius:16px;
-      background:rgba(255,255,255,.03);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-    }
-    .pie-legend{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      font-size:12px;
-      flex:1 1 160px;
-      min-width:0;
-      max-width:100%;
-    }
-    .pie-item{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      width:100%;
-      padding:6px 8px;
-      border-radius:12px;
-      background:rgba(255,255,255,.03);
-      border:1px solid rgba(255,255,255,.06);
-    }
-    .pie-left{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      min-width:0;
-    }
-    .pie-dot{
-      width:10px;
-      height:10px;
-      border-radius:50%;
-      flex:0 0 auto;
-      box-shadow: 0 0 0 2px rgba(0,0,0,.25);
-    }
-    .pie-label{
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width:150px;
-      text-overflow:ellipsis;
-      opacity:.95;
-    }
-    .pie-val{
-      font-variant-numeric: tabular-nums;
-      opacity:.95;
+    .sig-left{ font-size: 15px; }
+    .sig-right{
+      text-align:right;
+      font-family: "Brush Script MT", "Segoe Script", "Apple Chancery", cursive;
+      font-size: 28px;
+      color: rgba(60,30,10,.9);
     }
 
-
-/* Ajuste responsive: en móvil el modal baja, así que no reservamos espacio a la derecha */
-@media (max-width: 980px){
-  .layout{ padding-right: 12px !important; }
-}
-
-</style>
+    /* Impresión: solo el pergamino */
+    @media print{
+      body{ background:#fff; }
+      .snow,.stars,.santa-layer{ display:none !important; }
+      .wrap{ padding:0; }
+      .scroll{ box-shadow:none; width:100%; border-radius:0; }
+      .rod{ display:none; }
+      .scroll:before,.scroll:after{ display:none; }
+      .brand img{ box-shadow:none; }
+    }
+  </style>
 </head>
 <body>
+  <div class="stars" aria-hidden="true"></div>
 
-<header class="topbar">
-  <div class="brand">
-    <img class="brand-logo" src="https://res.cloudinary.com/dor6za85u/image/upload/v1765651460/Krystal_Grand_wo1rbs.jpg" alt="Krystal Grand Logo">
-    <div class="brand-text">
-      <div class="brand-title">Krystal Grand · División Cuartos</div>
-      <div class="brand-sub">Mapa Operativo de Habitaciones</div>
-    </div>
-  </div>
-  <div class="pill">ALTITUDE · PALMILLA · UNIQUE</div>
-  <div class="datetime"><span class="date"></span> · <span class="time"></span></div>
-</header>
-<!-- MODAL FIJO · AVANCE DE PULIDOS -->
-<div class="avance-modal" id="avanceModal">
-  <h3>Avance de Pulidos</h3>
-
-  <div class="av-item" data-scope="general">
-    <div class="av-row"><span class="av-label">General</span><span class="av-pct" id="pctGeneral">0%</span></div>
-    <div class="av-bar"><div class="av-fill" id="barGeneral"></div></div>
+  <div class="santa-layer" aria-hidden="true">
+    <img class="santa" alt="" src="https://res.cloudinary.com/dor6za85u/image/upload/v1766586685/Santa_Claus_hadcxt.png">
   </div>
 
-  <div class="av-item" data-scope="ALTITUDE">
-    <div class="av-row"><span class="av-label">Altitude</span><span class="av-pct" id="pctAltitude">0%</span></div>
-    <div class="av-bar"><div class="av-fill" id="barAltitude"></div></div>
-  </div>
+  <div class="snow" aria-hidden="true" id="snow"></div>
 
-  <div class="av-item" data-scope="PALMILLA">
-    <div class="av-row"><span class="av-label">Palmilla</span><span class="av-pct" id="pctPalmilla">0%</span></div>
-    <div class="av-bar"><div class="av-fill" id="barPalmilla"></div></div>
-  </div>
+  <main class="wrap">
+    <section class="scroll" role="article" aria-label="Carta de Santa">
+      <div class="rod top" aria-hidden="true"></div>
+      <div class="rod bottom" aria-hidden="true"></div>
 
-  <div class="av-item" data-scope="UNIQUE">
-    <div class="av-row"><span class="av-label">Unique</span><span class="av-pct" id="pctUnique">0%</span></div>
-    <div class="av-bar"><div class="av-fill" id="barUnique"></div></div>
-  </div>
-
-  
-  <div class="pie-section">
-    <div class="pie-title">Distribución de avance</div>
-    <div class="pie-row">
-      <canvas id="piePulidos" width="220" height="220" aria-label="Gráfica de pulidos"></canvas>
-      <div class="pie-legend" id="pieLegend"></div>
-    </div>
-  </div>
-
-  <div class="av-note" id="avNote">Verde aperlado = pulida · Rojo aperlado = pendiente</div>
-</div>
-
-
-<div class="layout">
-
-    <!-- TORRE 1 · ALTITUDE (NO TOCAR) -->
-    <section class="torre">
-        <div class="torre-header">Torre 1 · ALTITUDE</div>
-        <div class="torre-sub">
-        <div class="contadores">K: <span class="cnt-k">0</span> · M: <span class="cnt-m">0</span></div>
-Pisos 21 al 27</div>
-
-        <!-- Piso 27 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 27</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">2701</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2702</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2703</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2704</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2705</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2706</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2707</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2708</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2709</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2710</div><div class="tipo">KG</div></div>
-            </div>
+      <header>
+        <div class="brand">
+          <img src="https://res.cloudinary.com/dor6za85u/image/upload/v1765651460/Krystal_Grand_wo1rbs.jpg" alt="Krystal Grand" />
         </div>
 
-        <!-- Piso 26 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 26</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">2601</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2602</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2603</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2604</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2605</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2606</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2607</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2608</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2609</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2610</div><div class="tipo">KG</div></div>
-            </div>
-        </div>
+        <div class="seal"><span class="dot"></span> Polo Norte · Mensaje Oficial <span class="dot"></span></div>
+        <h1>🎄 Carta de Santa 🎅</h1>
+        <p class="sub">Para todo el equipo y líderes · Felices fiestas</p>
+      </header>
 
-        <!-- Piso 25 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 25</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">2501</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2502</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2503</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2504</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2505</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2506</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2507</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2508</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2509</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2510</div><div class="tipo">KG</div></div>
-            </div>
-        </div>
+      <div class="letter" id="letter">
+Queridas camaristas,
 
-        <!-- Piso 24 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 24</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">2401</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2402</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2403</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2404</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2405</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2406</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2407</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2408</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2409</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2410</div><div class="tipo">KG</div></div>
-            </div>
-        </div>
+¡Ho, ho, hooo!
+Desde el Polo Norte he estado observando con mucha atención… y no solo las cartas, sino el gran esfuerzo, la dedicación y el corazón que ponen todos los días en cada habitación.
 
-        <!-- Piso 23 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 23</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">2301</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2302</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2303</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2304</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2305</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2306</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2307</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2308</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2309</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2310</div><div class="tipo">KG</div></div>
-            </div>
-        </div>
+He visto madrugadas largas, camas perfectamente tendidas, baños relucientes y sonrisas que aparecen incluso cuando el cansancio ya quiere ganar.
+Y déjenme decirles algo muy importante: eso también es magia.
 
-        <!-- Piso 22 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 22</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">2201</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2202</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2203</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2204</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2205</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2206</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2207</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2208</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2209</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2210</div><div class="tipo">KG</div></div>
-            </div>
-        </div>
+Ahora, Santa aprovecha para pedirles unos pequeños favores navideños 😄🎁:
+por favor eviten que Rosa siga pidiéndome más leña… me dice que es “para un tal lomo”, pero yo ya sospecho que no es para la chimenea 🔥😉.
+No olviden usar sus mallitas en el cabello, que la magia también se ve en los detalles.
+Y ayúdenme mucho para que Calidad no nos siga bajando puntitos, porque Santa quiere puros dieces ⭐.
 
-        <!-- Piso 21 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 21</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">2101</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2102</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2103</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2104</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2105</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2106</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">2107</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">2108</div><div class="tipo">KG</div></div>
-            </div>
+Pero, sobre todo…
+nunca, nunca dejen de ser felices.
+Porque una camarista feliz se nota en cada habitación, en cada detalle y en cada huésped que se va con una sonrisa.
+
+Recuerden que cada huésped es un regalo que confía en nosotros como su casa.
+Con atención, cuidado y calidez, transformamos su estancia en un recuerdo bonito… y ya saben, un huésped bien atendido vuelve, recomienda y hasta deja galletas 🍪😉.
+
+Gracias por todo lo que hacen, por su esfuerzo diario y por ser parte fundamental de esta gran familia.
+Sigan trabajando con orgullo, con unión y con ese brillo especial que las distingue.
+
+¡Ho, ho, hooo… y Feliz Navidad! 🎄✨
+
+Con todo mi cariño y reconocimiento,
+
+🎅 Santa Claus
+      </div>
+
+      <div class="signature">
+        <div class="sig-left">
+          <strong>✨ Que la magia te acompañe</strong><br/>
+          <span style="opacity:.85;">— Mensaje para compartir con todo el equipo</span>
         </div>
+        <div class="sig-right">Santa</div>
+      </div>
     </section>
+  </main>
 
-    <!-- TORRE 2 · PALMILLA -->
-    <section class="torre">
-        <div class="torre-header">Torre 2 · PALMILLA</div>
-        <div class="torre-sub">
-        <div class="contadores">K: <span class="cnt-k">0</span> · M: <span class="cnt-m">0</span></div>
-Pisos 11 al 16</div>
+  <script>
+    // Nieve (más abundante y variada)
+    const snow = document.getElementById('snow');
+    const FLAKES = 140; // MÁS NIEVE
+    function rand(min, max){ return Math.random()*(max-min)+min; }
 
-        <!-- Piso 16 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 16</div>
-            <div class="fila">
-                <div class="hab kg"><div class="num">1601A</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1601B</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1602</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1603A</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1603B</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1604</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1605A</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">1605B</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
+    function createFlakes(){
+      snow.innerHTML = '';
+      for(let i=0;i<FLAKES;i++){
+        const f = document.createElement('div');
+        f.className = 'flake';
 
-        <!-- Piso 15 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 15</div>
-            <div class="fila">
-                <div class="hab kg"><div class="num">1501A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1501B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1502</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1503A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1503B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1504</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1505A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1505B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1506</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1507A</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1507B</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
+        const size = rand(2, 10);
+        f.style.width = size + 'px';
+        f.style.height = size + 'px';
 
-        <!-- Piso 14 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 14</div>
-            <div class="fila">
-                <div class="hab kg"><div class="num">1401A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1401B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1402</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1403A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1403B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1404</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1405A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1405B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1406</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1407A</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1407B</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
+        f.style.left = rand(0, 100) + 'vw';
 
-        <!-- Piso 13 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 13</div>
-            <div class="fila">
-                <div class="hab kg"><div class="num">1301A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1301B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1302</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1303A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1303B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1304</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1305A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1305B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1306</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1307A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1307B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1308</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1309A</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1309B</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
+        const fallDur = rand(6.5, 16);
+        const swayDur = rand(2.2, 6.2);
+        const delay = rand(0, 10);
 
-        <!-- Piso 12 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 12</div>
-            <div class="fila">
-                <div class="hab kg"><div class="num">1201A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1201B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1202</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1203A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1203B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1204</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1205A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1205B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1206</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1207A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1207B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1208</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1209A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1209B</div><div class="tipo">K/D</div></div>
-            </div>
-        </div>
+        f.style.animationDuration = `${fallDur}s, ${swayDur}s`;
+        f.style.animationDelay = `${delay}s, ${rand(0,2)}s`;
+        f.style.opacity = rand(0.45, 0.98);
 
-        <!-- Piso 11 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 11</div>
-            <div class="fila">
-                <div class="hab kg"><div class="num">1101A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1101B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1102</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1103A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1103B</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1104</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1105A</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1105B</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1106</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">1107A</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1107B</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">1108</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">1109A</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">1109B</div><div class="tipo">K/K</div></div>
-            </div>
-        </div>
-    </section>
+        // Algunas nieves más “suaves”
+        if (Math.random() < 0.35){
+          f.style.filter = 'blur(1px)';
+          f.style.opacity = rand(0.25, 0.6);
+        }
 
-    <!-- TORRE 3 · UNIQUE -->
-    <section class="torre unique">
-        <div class="torre-header">Torre 3 · UNIQUE</div>
-        <div class="torre-sub">
-        <div class="contadores">K: <span class="cnt-k">0</span> · M: <span class="cnt-m">0</span></div>
-Pisos 41 al 47 (equivalentes a 1–7)</div>
-
-        <!-- Piso 47 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 47</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">4701</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4702</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4703</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4704</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4705</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4706</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4707</div><div class="tipo">PRL</div></div>
-                <div class="hab mt"><div class="num">4709</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4710</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4711</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4712</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4714</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4715</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4716</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4717</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4718</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4719</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4720</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4721</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4722</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4723</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4724</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4725</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4726</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4727</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4728</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4729</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4730</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4731</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4732</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4733</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
-
-        <!-- Piso 46 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 46</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">4601</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4602</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4603</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4604</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4605</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4606</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4607</div><div class="tipo">KY KG</div></div>
-                <div class="hab kg"><div class="num">4608</div><div class="tipo">KY KG</div></div>
-                <div class="hab mt"><div class="num">4609</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4610</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4611</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4612</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4614</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4615</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4616</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4617</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4618</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4619</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4620</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4621</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4622</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4623</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4624</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4625</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4626</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4627</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4628</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4629</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4630</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4631</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4632</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4633</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
-
-        <!-- Piso 45 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 45</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">4501</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4502</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4503</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4504</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4505</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4506</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4507</div><div class="tipo">KY KG</div></div>
-                <div class="hab kg"><div class="num">4508</div><div class="tipo">KY KG</div></div>
-                <div class="hab mt"><div class="num">4509</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4510</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4511</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4512</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4514</div><div class="tipo">KG/CM</div></div>
-                <div class="hab mt"><div class="num">4515</div><div class="tipo">MT/CM</div></div>
-                <div class="hab kg"><div class="num">4516</div><div class="tipo">KG/CM</div></div>
-                <div class="hab mt"><div class="num">4517</div><div class="tipo">MT/CM</div></div>
-                <div class="hab kg"><div class="num">4518</div><div class="tipo">KG/CM</div></div>
-                <div class="hab mt"><div class="num">4519</div><div class="tipo">MT/CM</div></div>
-                <div class="hab mt"><div class="num">4520</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4521</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4522</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4523</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4524</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4525</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4526</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4527</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4528</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4529</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4530</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4531</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4532</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4533</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
-
-        <!-- Piso 44 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 44</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">4401</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4402</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4403</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4404</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4405</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4406</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4409</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4410</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4411</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4412</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4414</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4415</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4416</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4417</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4418</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4419</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4420</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4421</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4422</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4423</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4424</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4425</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4426</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4427</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4428</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4429</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4430</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4431</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4432</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4433</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
-
-        <!-- Piso 43 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 43</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">4312</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4314</div><div class="tipo">DDP</div></div>
-                <div class="hab mt"><div class="num">4315</div><div class="tipo">MT/CM</div></div>
-                <div class="hab mt"><div class="num">4316</div><div class="tipo">DDP</div></div>
-                <div class="hab mt"><div class="num">4317</div><div class="tipo">MT/CM</div></div>
-                <div class="hab mt"><div class="num">4318</div><div class="tipo">DDP</div></div>
-                <div class="hab mt"><div class="num">4319</div><div class="tipo">MT/CM</div></div>
-                <div class="hab mt"><div class="num">4320</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4321</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4322</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4323</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4324</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4325</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4326</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4327</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4328</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4329</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4330</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4331</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4332</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4333</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
-
-        <!-- Piso 42 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 42</div>
-            <div class="fila">
-                <div class="hab mt"><div class="num">4212</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4214</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4215</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4216</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4217</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4218</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4219</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4220</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4221</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4222</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4223</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4224</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4225</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4226</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4227</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4228</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4229</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4230</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4231</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4232</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4233</div><div class="tipo">MT</div></div>
-            </div>
-        </div>
-
-        <!-- Piso 41 -->
-        <div class="piso">
-            <div class="piso-titulo">Piso 41</div>
-            <div class="fila">
-                <div class="hab kg"><div class="num">4112</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4114</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4115</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4116</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4117</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4118</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4119</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4120</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4121</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4122</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4123</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4124</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4125</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4126</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4127</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4128</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4129</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4130</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4131</div><div class="tipo">KG</div></div>
-                <div class="hab kg"><div class="num">4132</div><div class="tipo">KG</div></div>
-            </div>
-        </div>
-
-    </section>
-
-
-    </div>
-
-
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.torre').forEach(torre => {
-    let k = 0, m = 0;
-    torre.querySelectorAll('.hab .tipo').forEach(t => {
-      const txt = t.textContent.trim().toUpperCase();
-      if (txt.startsWith('K')) k++;
-      if (txt.startsWith('M')) m++;
-    });
-    const kSpan = torre.querySelector('.cnt-k');
-    const mSpan = torre.querySelector('.cnt-m');
-    if (kSpan) kSpan.textContent = k;
-    if (mSpan) mSpan.textContent = m;
-  });
-
-  // === Base de datos de pulidos (último pulido) ===
-  const PULIDOS = {
-  "2101": "2025-06-07",
-  "2102": "2025-06-07",
-  "2103": "2025-06-07",
-  "2104": "2025-06-07",
-  "2105": "2025-06-07",
-  "2106": "2025-06-07",
-  "2107": "2025-06-07",
-  "2108": "2025-06-07",
-  "2201": "2025-06-07",
-  "2202": "2025-06-07",
-  "2203": "2025-06-07",
-  "2204": "2025-06-07",
-  "2205": "2025-06-10",
-  "2206": "2025-06-09",
-  "2207": "2025-06-07",
-  "2208": "2025-06-07",
-  "2209": "2025-06-07",
-  "2210": "2025-06-07",
-  "2301": "2025-06-11",
-  "2302": "2025-06-10",
-  "2303": "2025-06-09",
-  "2304": "2025-06-08",
-  "2305": "2025-06-07",
-  "2306": "2025-06-06",
-  "2307": "2025-06-05",
-  "2308": "2025-06-11",
-  "2309": "2025-06-03",
-  "2310": "2025-06-03",
-  "2401": "2025-06-16",
-  "2402": "2025-06-16",
-  "2403": "2025-06-16",
-  "2404": "2025-06-16",
-  "2405": "2025-06-16",
-  "2406": "2025-06-16",
-  "2407": "2025-06-08",
-  "2408": "2025-06-16",
-  "2409": "2025-06-28",
-  "2410": "2025-06-17",
-  "2501": "2025-06-16",
-  "2502": "2025-07-06",
-  "2503": "2025-06-18",
-  "2504": "2025-07-11",
-  "2505": "2025-06-16",
-  "2506": "2025-06-25",
-  "2507": "2025-06-12",
-  "2508": "2025-06-16",
-  "2509": "2025-06-16",
-  "2510": "2025-06-16",
-  "2601": "2025-06-16",
-  "2602": "2025-06-25",
-  "2603": "2025-06-16",
-  "2604": "2025-06-16",
-  "2605": "2025-05-30",
-  "2606": "2025-06-16",
-  "2607": "2025-06-16",
-  "2608": "2025-06-16",
-  "2609": "2025-06-16",
-  "2610": "2025-06-16",
-  "2701": "2025-06-16",
-  "2702": "2025-06-16",
-  "2703": "2025-06-16",
-  "2704": "2025-06-16",
-  "2705": "2025-06-16",
-  "2706": "2025-06-16",
-  "2707": "2025-06-16",
-  "2708": "2025-06-16",
-  "2709": "2025-06-16",
-  "2710": "2025-06-16",
-  "4112": "2025-06-27",
-  "4114": "2025-07-10",
-  "4115": "2025-07-10",
-  "4116": "2025-07-13",
-  "4117": "2025-07-13",
-  "4118": "2025-07-09",
-  "4119": "2025-07-11",
-  "4120": "2025-07-14",
-  "4121": "2025-07-16",
-  "4122": "2025-07-17",
-  "4123": "2025-07-15",
-  "4124": "2025-07-01",
-  "4125": "2025-06-30",
-  "4126": "2025-07-18",
-  "4127": "2025-07-23",
-  "4128": "2025-08-08",
-  "4129": "2025-07-18",
-  "4130": "2025-08-08",
-  "4131": "2025-08-13",
-  "4132": "2025-08-13",
-  "4212": "2025-08-16",
-  "4217": "2025-12-14",
-  "4222": "2025-12-13",
-  "4230": "2025-12-05",
-  "4406": "2025-11-13",
-  "4415": "2025-12-08",
-  "4418": "2025-11-25",
-  "4421": "2025-11-29",
-  "4431": "2025-11-13",
-  "4507": "2025-11-28",
-  "4508": "2025-11-28",
-  "4518": "2025-06-03",
-  "4521": "2025-06-24",
-  "4524": "2025-12-11",
-  "4529": "2025-11-26",
-  "4601": "2025-09-13",
-  "4602": "2025-09-09",
-  "4603": "2025-12-03",
-  "4604": "2025-12-15",
-  "4605": "2025-09-11",
-  "4607": "2025-05-17",
-  "4608": "2025-11-27",
-  "4609": "2025-09-01",
-  "4610": "2025-08-29",
-  "4611": "2025-08-29",
-  "4612": "2025-08-31",
-  "4614": "2025-06-23",
-  "4615": "2025-11-24",
-  "4616": "2025-06-03",
-  "4617": "2025-12-14",
-  "4620": "2025-08-30",
-  "4621": "2025-12-17",
-  "4622": "2025-09-12",
-  "4623": "2025-09-02",
-  "4624": "2025-09-08",
-  "4626": "2025-09-06",
-  "4629": "2025-09-13",
-  "4631": "2025-08-30",
-  "4632": "2025-09-13",
-  "4633": "2025-09-08",
-  "4701": "2025-09-15",
-  "4702": "2025-09-17",
-  "4703": "2025-07-22",
-  "4704": "2025-09-29",
-  "4705": "2025-12-11",
-  "4706": "2025-09-27",
-  "4707": "2025-05-14",
-  "4709": "2025-11-28",
-  "4710": "2025-12-16",
-  "4711": "2025-09-16",
-  "4712": "2025-09-27",
-  "4714": "2025-11-15",
-  "4715": "2025-09-20",
-  "4716": "2025-11-21",
-  "4717": "2025-08-18",
-  "4718": "2025-11-24",
-  "4719": "2025-09-20",
-  "4720": "2025-12-16",
-  "4722": "2025-12-02",
-  "4724": "2025-07-20",
-  "4725": "2025-10-21",
-  "4726": "2025-07-21",
-  "4728": "2025-11-15",
-  "4729": "2025-12-09",
-  "4730": "2025-10-20",
-  "4731": "2025-12-13",
-  "4732": "2025-11-22",
-  "4733": "2025-10-20"
-};
-
-
-  const fmt = (iso) => {
-    const [y,m,d] = String(iso).split('-');
-    if(!y||!m||!d) return iso;
-    return `${d}/${m}/${y}`;
-  };
-
-  // Default: rojo aperlado. Si tiene fecha: verde aperlado + tooltip con fecha.
-  document.querySelectorAll('.hab').forEach(h => {
-    const numEl = h.querySelector('.num');
-    const num = numEl ? numEl.textContent.trim() : '';
-    h.classList.add('no-pulida');
-    h.classList.remove('pulida');
-
-    const fecha = PULIDOS[num];
-    if (fecha) {
-      h.classList.remove('no-pulida');
-      h.classList.add('pulida');
-      h.setAttribute('title', `Pulido: ${fmt(fecha)}`);
-    } else {
-      h.removeAttribute('title');
-    }
-  });
-
-
-
-  // === Avance por torre (Altitude / Palmilla / Unique) ===
-  function setPct(idPct, idBar, pct){
-    const p = Math.max(0, Math.min(100, Math.round(pct)));
-    const elPct = document.getElementById(idPct);
-    const elBar = document.getElementById(idBar);
-    if (elPct) elPct.textContent = p + '%';
-    if (elBar) elBar.style.width = p + '%';
-  }
-
-  
-  function renderPieChart(a,p,u,totalAll,pulidasAll,pctAll){
-    const canvas = document.getElementById('piePulidos');
-    const legend = document.getElementById('pieLegend');
-    if (!canvas || !legend) return;
-
-    const pendientes = Math.max(0, totalAll - pulidasAll);
-
-    const segments = [
-      { key:'Altitude', label:'Altitude pulidas', value:a.pulidas, color:'#2ec4a6' },
-      { key:'Palmilla', label:'Palmilla pulidas', value:p.pulidas, color:'#4ea1ff' },
-      { key:'Unique', label:'Unique pulidas', value:u.pulidas, color:'#b37bff' },
-      { key:'Pendientes', label:'Pendientes', value:pendientes, color:'#ff5b6e' }
-    ].filter(s => s.value > 0);
-
-    // Legend
-    legend.innerHTML = segments.map(s => {
-      const pct = totalAll ? (s.value/totalAll)*100 : 0;
-      return `
-        <div class="pie-item">
-          <div class="pie-left">
-            <span class="pie-dot" style="background:${s.color}"></span>
-            <span class="pie-label">${s.label}</span>
-          </div>
-          <span class="pie-val">${pct.toFixed(0)}%</span>
-        </div>
-      `;
-    }).join('');
-
-    // Draw
-    const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0,0,W,H);
-
-    const cx = W/2, cy = H/2;
-    const rOuter = Math.min(W,H)*0.48;
-    const rInner = rOuter*0.62; // donut
-
-    // Background ring
-    ctx.beginPath();
-    ctx.arc(cx,cy,rOuter,0,Math.PI*2);
-    ctx.arc(cx,cy,rInner,0,Math.PI*2,true);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(255,255,255,0.04)';
-    ctx.fill();
-
-    let angle = -Math.PI/2;
-    const gap = 0.012; // rad gap
-    segments.forEach(s=>{
-      const slice = totalAll ? (s.value/totalAll)*Math.PI*2 : 0;
-      const a0 = angle + gap;
-      const a1 = angle + slice - gap;
-
-      if (a1 > a0){
-        ctx.beginPath();
-        ctx.arc(cx,cy,rOuter,a0,a1);
-        ctx.arc(cx,cy,rInner,a1,a0,true);
-        ctx.closePath();
-        ctx.fillStyle = s.color;
-        ctx.fill();
-
-        // subtle stroke
-        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        snow.appendChild(f);
       }
-      angle += slice;
-    });
-
-    // Center text
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText(`${pctAll.toFixed(0)}%`, cx, cy-6);
-    ctx.font = '12px Arial';
-    ctx.fillStyle = 'rgba(255,255,255,0.75)';
-    ctx.fillText('Pulidos', cx, cy+14);
-  }
-
-
-  function calcTorre(nombre){
-    const secciones = Array.from(document.querySelectorAll('section.torre'));
-    const sec = secciones.find(s => {
-      const h = s.querySelector('.torre-header');
-      return h && h.textContent.toUpperCase().includes(nombre.toUpperCase());
-    });
-    if (!sec) return { total: 0, pulidas: 0, pct: 0 };
-
-    const habs = Array.from(sec.querySelectorAll('.hab'));
-    const total = habs.length;
-    const pulidas = habs.filter(h => h.classList.contains('pulida')).length;
-    const pct = total ? (pulidas / total) * 100 : 0;
-    return { total, pulidas, pct };
-  }
-
-  function updateAvances(){
-    const a = calcTorre('ALTITUDE');
-    const p = calcTorre('PALMILLA');
-    const u = calcTorre('UNIQUE');
-
-    const totalAll = a.total + p.total + u.total;
-    const pulidasAll = a.pulidas + p.pulidas + u.pulidas;
-    const pctAll = totalAll ? (pulidasAll / totalAll) * 100 : 0;
-
-    setPct('pctGeneral', 'barGeneral', pctAll);
-    setPct('pctAltitude', 'barAltitude', a.pct);
-    setPct('pctPalmilla', 'barPalmilla', p.pct);
-    setPct('pctUnique', 'barUnique', u.pct);
-
-    renderPieChart(a,p,u,totalAll,pulidasAll,pctAll);
-
-    const note = document.getElementById('avNote');
-    if (note){
-      note.textContent = `General: ${pulidasAll}/${totalAll} · Altitude: ${a.pulidas}/${a.total} · Palmilla: ${p.pulidas}/${p.total} · Unique: ${u.pulidas}/${u.total}`;
     }
-  }
 
-  // Actualiza el modal una vez aplicados los pulidos
-  updateAvances();
+    createFlakes();
 
-});
-</script>
-
-
-<footer class="firma">
-    Formato de apoyo a la operación del Departamento de Ama de Llaves — Krystal Grand Los Cabos.<br>
-    Responsable operativo: <em>Luis Hernaldo</em>, Asistente Operativo de Ama de Llaves.
-</footer>
-
-
-<script>
-function updateDateTime(){
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
-  const timeStr = now.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  const d = document.querySelector('.datetime .date');
-  const t = document.querySelector('.datetime .time');
-  if(d) d.textContent = dateStr;
-  if(t) t.textContent = timeStr;
-}
-setInterval(updateDateTime, 1000);
-updateDateTime();
-</script>
-
+    let t;
+    window.addEventListener('resize', () => {
+      clearTimeout(t);
+      t = setTimeout(createFlakes, 150);
+    });
+  </script>
 </body>
 </html>
