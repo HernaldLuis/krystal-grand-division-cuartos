@@ -160,9 +160,34 @@
         gap:6px;
         align-items:start;
         justify-content:start;
+    
+  gap: 8px; /* ajuste fino */
+  padding-right: 10px; /* evita que el último cuadro se pegue */
+}
+
+    
+    /* UNIQUE: corte controlado de fila y contención dentro del contenedor */
+    .torre.unique .centroA{
+        grid-column: 9; /* centro-izq */
+    }
+    .torre.unique .centroB{
+        grid-column: 10; /* centro-der */
     }
 
-    /* Evitar que cualquier torre desborde visualmente */
+    .torre.unique .centro{
+        grid-column: 9; /* columna central (de 18) */
+    }
+
+    .torre.unique .break{
+        grid-column: 1 / -1; /* ocupa toda la fila del grid */
+        height: 0;
+    }
+    .torre.unique .torre-sub{
+        overflow-x: auto;   /* evita que los cuadros “salgan”; crea scroll si hace falta */
+        overflow-y: hidden;
+        max-width: 100%;
+    }
+/* Evitar que cualquier torre desborde visualmente */
     .torre{ overflow:hidden; }
 
 
@@ -794,6 +819,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab mt"><div class="num">4705</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4706</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4707</div><div class="tipo">PRL</div></div>
+                <div class="hab mt"><div class="num">4708</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4709</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4710</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4711</div><div class="tipo">MT</div></div>
@@ -801,8 +827,9 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4714</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4715</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4716</div><div class="tipo">KG</div></div>
+                <div class="break"></div> <!-- CORTE: 4701–4716 arriba / 4717–4732 abajo -->
                 <div class="hab mt"><div class="num">4717</div><div class="tipo">MT</div></div>
-                <div class="hab kg"><div class="num">4718</div><div class="tipo">KG</div></div>
+		<div class="hab kg"><div class="num">4718</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4719</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4720</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4721</div><div class="tipo">KG</div></div>
@@ -816,8 +843,9 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4729</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4730</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4731</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4732</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4733</div><div class="tipo">MT</div></div>
+                <div class="break"></div> <!-- CORTE: 4732–4733 en 3ra fila (centradas) -->
+                <div class="hab mt centroA"><div class="num">4732</div><div class="tipo">MT</div></div>
+                <div class="hab mt centroB"><div class="num">4733</div><div class="tipo">MT</div></div>
             </div>
         </div>
 
@@ -840,6 +868,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4614</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4615</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4616</div><div class="tipo">KG</div></div>
+                <div class="break"></div> <!-- CORTE: 4601–4616 arriba / 4617–4632 abajo -->
                 <div class="hab mt"><div class="num">4617</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4618</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4619</div><div class="tipo">MT</div></div>
@@ -855,8 +884,8 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4629</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4630</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4631</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4632</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4633</div><div class="tipo">MT</div></div>
+                <div class="hab mt centroA"><div class="num">4632</div><div class="tipo">MT</div></div>
+                <div class="hab mt centroB"><div class="num">4633</div><div class="tipo">MT</div></div>
             </div>
         </div>
 
@@ -879,6 +908,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4514</div><div class="tipo">KG/CM</div></div>
                 <div class="hab mt"><div class="num">4515</div><div class="tipo">MT/CM</div></div>
                 <div class="hab kg"><div class="num">4516</div><div class="tipo">KG/CM</div></div>
+		<div class="break"></div> <!-- CORTE: 4501–4516 arriba / 4517–4532 abajo -->
                 <div class="hab mt"><div class="num">4517</div><div class="tipo">MT/CM</div></div>
                 <div class="hab kg"><div class="num">4518</div><div class="tipo">KG/CM</div></div>
                 <div class="hab mt"><div class="num">4519</div><div class="tipo">MT/CM</div></div>
@@ -894,8 +924,9 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4529</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4530</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4531</div><div class="tipo">KG</div></div>
-                <div class="hab mt"><div class="num">4532</div><div class="tipo">MT</div></div>
-                <div class="hab mt"><div class="num">4533</div><div class="tipo">MT</div></div>
+                <div class="break"></div> <!-- CORTE 45: fin fila 2 (4531) -->
+                <div class="hab mt centroA"><div class="num">4532</div><div class="tipo">MT</div></div>
+                <div class="hab mt centroB"><div class="num">4533</div><div class="tipo">MT</div></div>
             </div>
         </div>
 
@@ -909,6 +940,8 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab mt"><div class="num">4404</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4405</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4406</div><div class="tipo">MT</div></div>
+		<div class="hab mt"><div class="num">4407</div><div class="tipo">MT</div></div>
+		<div class="hab mt"><div class="num">4408</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4409</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4410</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4411</div><div class="tipo">MT</div></div>
@@ -916,6 +949,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4414</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4415</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4416</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab mt"><div class="num">4417</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4418</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4419</div><div class="tipo">MT</div></div>
@@ -931,6 +965,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4429</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4430</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4431</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab mt"><div class="num">4432</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4433</div><div class="tipo">MT</div></div>
             </div>
@@ -955,6 +990,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4325</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4326</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4327</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab mt"><div class="num">4328</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4329</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4330</div><div class="tipo">MT</div></div>
@@ -983,6 +1019,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4225</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4226</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4227</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab mt"><div class="num">4228</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4229</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4230</div><div class="tipo">MT</div></div>
@@ -1011,6 +1048,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4125</div><div class="tipo">KG</div></div>
                 <div class="hab kg"><div class="num">4126</div><div class="tipo">KG</div></div>
                 <div class="hab kg"><div class="num">4127</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab kg"><div class="num">4128</div><div class="tipo">KG</div></div>
                 <div class="hab kg"><div class="num">4129</div><div class="tipo">KG</div></div>
                 <div class="hab kg"><div class="num">4130</div><div class="tipo">KG</div></div>
@@ -1198,7 +1236,8 @@ document.addEventListener('DOMContentLoaded', () => {
   "4730": "2025-10-20",
   "4731": "2025-12-13",
   "4732": "2025-11-22",
-  "4733": "2025-10-20"
+  "4733": "2025-10-20",
+
 };
 
 
