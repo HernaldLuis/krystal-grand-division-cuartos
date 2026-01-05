@@ -407,47 +407,6 @@
   background: linear-gradient(145deg, #1f7f5c, #55d6a3);
   transition: width .35s ease;
 }
-
-/* === EFECTO APERLADO (misma paleta) === */
-.av-fill{
-  position: relative;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.28),
-    inset 0 -2px 0 rgba(0,0,0,.25),
-    0 6px 16px rgba(0,0,0,.25);
-}
-.av-fill::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  background: linear-gradient(120deg, rgba(255,255,255,.38), rgba(255,255,255,0) 55%);
-  mix-blend-mode: overlay;
-  pointer-events:none;
-}
-.av-meta{
-  margin-top: 4px;
-  font-size: 11px;
-  color: rgba(255,255,255,.78);
-  display:flex;
-  justify-content:flex-end;
-}
-.av-count{
-  letter-spacing:.2px;
-  opacity:.9;
-}
-.pie-dot{
-  box-shadow: 0 0 0 1px rgba(255,255,255,.10), 0 6px 14px rgba(0,0,0,.25);
-  position: relative;
-}
-.pie-dot::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.45), rgba(255,255,255,0) 55%);
-  pointer-events:none;
-}
-
 .av-note{
   margin-top: 10px;
   font-size: 11px;
@@ -541,19 +500,6 @@
   .layout{ padding-right: 12px !important; }
 }
 
-
-/* === EFECTO VISUAL: RESPIRACIÓN SUAVE (CONSULTA) === */
-@keyframes breatheSoft {
-  0%,100% { filter: brightness(1); }
-  50% { filter: brightness(1.08); }
-}
-
-.av-fill,
-.chart-wrapper,
-#piePulidos {
-  animation: breatheSoft 6s ease-in-out infinite;
-}
-
 </style>
 </head>
 <body>
@@ -576,25 +522,21 @@
   <div class="av-item" data-scope="general">
     <div class="av-row"><span class="av-label">General</span><span class="av-pct" id="pctGeneral">0%</span></div>
     <div class="av-bar"><div class="av-fill" id="barGeneral"></div></div>
-    <div class="av-meta"><span class="av-count" id="countGeneral">0 / 0 hab</span></div>
   </div>
 
   <div class="av-item" data-scope="ALTITUDE">
     <div class="av-row"><span class="av-label">Altitude</span><span class="av-pct" id="pctAltitude">0%</span></div>
     <div class="av-bar"><div class="av-fill" id="barAltitude"></div></div>
-    <div class="av-meta"><span class="av-count" id="countAltitude">0 / 0 hab</span></div>
   </div>
 
   <div class="av-item" data-scope="PALMILLA">
     <div class="av-row"><span class="av-label">Palmilla</span><span class="av-pct" id="pctPalmilla">0%</span></div>
     <div class="av-bar"><div class="av-fill" id="barPalmilla"></div></div>
-    <div class="av-meta"><span class="av-count" id="countPalmilla">0 / 0 hab</span></div>
   </div>
 
   <div class="av-item" data-scope="UNIQUE">
     <div class="av-row"><span class="av-label">Unique</span><span class="av-pct" id="pctUnique">0%</span></div>
     <div class="av-bar"><div class="av-fill" id="barUnique"></div></div>
-    <div class="av-meta"><span class="av-count" id="countUnique">0 / 0 hab</span></div>
   </div>
 
   
@@ -887,7 +829,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4716</div><div class="tipo">KG</div></div>
                 <div class="break"></div> <!-- CORTE: 4701–4716 arriba / 4717–4732 abajo -->
                 <div class="hab mt"><div class="num">4717</div><div class="tipo">MT</div></div>
-<div class="hab kg"><div class="num">4718</div><div class="tipo">KG</div></div>
+		<div class="hab kg"><div class="num">4718</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4719</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4720</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4721</div><div class="tipo">KG</div></div>
@@ -966,6 +908,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4514</div><div class="tipo">KG/CM</div></div>
                 <div class="hab mt"><div class="num">4515</div><div class="tipo">MT/CM</div></div>
                 <div class="hab kg"><div class="num">4516</div><div class="tipo">KG/CM</div></div>
+		<div class="break"></div> <!-- CORTE: 4501–4516 arriba / 4517–4532 abajo -->
                 <div class="hab mt"><div class="num">4517</div><div class="tipo">MT/CM</div></div>
                 <div class="hab kg"><div class="num">4518</div><div class="tipo">KG/CM</div></div>
                 <div class="hab mt"><div class="num">4519</div><div class="tipo">MT/CM</div></div>
@@ -997,6 +940,8 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab mt"><div class="num">4404</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4405</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4406</div><div class="tipo">MT</div></div>
+		<div class="hab mt"><div class="num">4407</div><div class="tipo">MT</div></div>
+		<div class="hab mt"><div class="num">4408</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4409</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4410</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4411</div><div class="tipo">MT</div></div>
@@ -1004,6 +949,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4414</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4415</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4416</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab mt"><div class="num">4417</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4418</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4419</div><div class="tipo">MT</div></div>
@@ -1019,6 +965,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4429</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4430</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4431</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab mt"><div class="num">4432</div><div class="tipo">MT</div></div>
                 <div class="hab mt"><div class="num">4433</div><div class="tipo">MT</div></div>
             </div>
@@ -1043,6 +990,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4325</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4326</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4327</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab mt"><div class="num">4328</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4329</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4330</div><div class="tipo">MT</div></div>
@@ -1071,6 +1019,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4225</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4226</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4227</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab mt"><div class="num">4228</div><div class="tipo">MT</div></div>
                 <div class="hab kg"><div class="num">4229</div><div class="tipo">KG</div></div>
                 <div class="hab mt"><div class="num">4230</div><div class="tipo">MT</div></div>
@@ -1099,6 +1048,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
                 <div class="hab kg"><div class="num">4125</div><div class="tipo">KG</div></div>
                 <div class="hab kg"><div class="num">4126</div><div class="tipo">KG</div></div>
                 <div class="hab kg"><div class="num">4127</div><div class="tipo">KG</div></div>
+		<div class="break"></div>
                 <div class="hab kg"><div class="num">4128</div><div class="tipo">KG</div></div>
                 <div class="hab kg"><div class="num">4129</div><div class="tipo">KG</div></div>
                 <div class="hab kg"><div class="num">4130</div><div class="tipo">KG</div></div>
@@ -1286,7 +1236,8 @@ document.addEventListener('DOMContentLoaded', () => {
   "4730": "2025-10-20",
   "4731": "2025-12-13",
   "4732": "2025-11-22",
-  "4733": "2025-10-20"
+  "4733": "2025-10-20",
+
 };
 
 
@@ -1316,38 +1267,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // === Avance por torre (Altitude / Palmilla / Unique) ===
-  
-  function shadeHex(hex, amt){
-    // amt: -100..100 (negative = darker, positive = lighter)
-    const h = hex.replace('#','');
-    const num = parseInt(h,16);
-    let r = (num >> 16) & 255;
-    let g = (num >> 8) & 255;
-    let b = num & 255;
-    const adj = (v)=> Math.max(0, Math.min(255, Math.round(v + (amt/100)*255)));
-    r = adj(r); g = adj(g); b = adj(b);
-    return '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
-  }
-  function pearlGradient(hex){
-    const light = shadeHex(hex, 22);
-    const dark  = shadeHex(hex, -18);
-    return `linear-gradient(135deg, ${light}, ${hex} 48%, ${dark})`;
-  }
-
-function setPct(idPct, idBar, pct, done, total, color){
+  function setPct(idPct, idBar, pct){
     const p = Math.max(0, Math.min(100, Math.round(pct)));
     const elPct = document.getElementById(idPct);
     const elBar = document.getElementById(idBar);
     if (elPct) elPct.textContent = p + '%';
-    if (elBar){
-      elBar.style.width = p + '%';
-      if (color) elBar.style.background = pearlGradient(color);
-    }
-    const countId = idPct.replace('pct','count');
-    const elCount = document.getElementById(countId);
-    if (elCount && typeof done === 'number' && typeof total === 'number'){
-      elCount.textContent = `${done} / ${total} hab`;
-    }
+    if (elBar) elBar.style.width = p + '%';
   }
 
   
@@ -1364,18 +1289,6 @@ function setPct(idPct, idBar, pct, done, total, color){
       { key:'Unique', label:'Unique pulidas', value:u.pulidas, color:'#b37bff' },
       { key:'Pendientes', label:'Pendientes', value:pendientes, color:'#ff5b6e' }
     ].filter(s => s.value > 0);
-
-    function pearlSlice(ctx, cx, cy, rOuter, base){
-      const light = shadeHex(base, 26);
-      const dark  = shadeHex(base, -20);
-      const g = ctx.createRadialGradient(cx - rOuter*0.25, cy - rOuter*0.35, rOuter*0.10, cx, cy, rOuter);
-      g.addColorStop(0, 'rgba(255,255,255,0.45)');
-      g.addColorStop(0.18, light);
-      g.addColorStop(0.55, base);
-      g.addColorStop(1, dark);
-      return g;
-    }
-
 
     // Legend
     legend.innerHTML = segments.map(s => {
@@ -1420,7 +1333,7 @@ function setPct(idPct, idBar, pct, done, total, color){
         ctx.arc(cx,cy,rOuter,a0,a1);
         ctx.arc(cx,cy,rInner,a1,a0,true);
         ctx.closePath();
-        ctx.fillStyle = pearlSlice(ctx, cx, cy, rOuter, s.color);
+        ctx.fillStyle = s.color;
         ctx.fill();
 
         // subtle stroke
@@ -1467,10 +1380,10 @@ function setPct(idPct, idBar, pct, done, total, color){
     const pulidasAll = a.pulidas + p.pulidas + u.pulidas;
     const pctAll = totalAll ? (pulidasAll / totalAll) * 100 : 0;
 
-    setPct('pctGeneral', 'barGeneral', pctAll, pulidasAll, totalAll, '#26c2a5');
-    setPct('pctAltitude', 'barAltitude', a.pct, a.pulidas, a.total, '#2ec4a6');
-    setPct('pctPalmilla', 'barPalmilla', p.pct, p.pulidas, p.total, '#4ea1ff');
-    setPct('pctUnique', 'barUnique', u.pct, u.pulidas, u.total, '#b37bff');
+    setPct('pctGeneral', 'barGeneral', pctAll);
+    setPct('pctAltitude', 'barAltitude', a.pct);
+    setPct('pctPalmilla', 'barPalmilla', p.pct);
+    setPct('pctUnique', 'barUnique', u.pct);
 
     renderPieChart(a,p,u,totalAll,pulidasAll,pctAll);
 
