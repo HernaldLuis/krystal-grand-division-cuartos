@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mapa de Habitaciones · Krystal Grand</title>
+<!-- Supabase (cloud storage) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
     :root{
     --bg: #0b141c;
@@ -575,6 +577,204 @@
   font-weight:700;
 }
 
+
+
+/* === REGISTRO DE AVANCE (MODAL) === */
+:root{
+  --yellow1:#f7e27a; /* amarillo aperlado brillante */
+  --yellow2:#e8c63a;
+  --yellow3:#b98a00;
+}
+.hab.en-proceso{
+  background: linear-gradient(145deg, var(--yellow1), var(--yellow2)) !important;
+  color:#1b1b1b !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -2px 0 rgba(0,0,0,.18),
+    0 10px 22px rgba(0,0,0,.28) !important;
+  position:relative;
+  animation: habPulse 1.25s ease-in-out infinite;
+}
+@keyframes habPulse{
+  0%{ transform: translateY(0); filter: brightness(1); }
+  50%{ transform: translateY(-1px); filter: brightness(1.08); }
+  100%{ transform: translateY(0); filter: brightness(1); }
+}
+.hab.en-proceso::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:10px;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.55), rgba(255,255,255,0) 55%);
+  pointer-events:none;
+}
+
+
+/* === POR VENCER (amarillo aperlado SIN pulso) === */
+.hab.por-vencer{
+  background: linear-gradient(145deg, var(--yellow1), var(--yellow2)) !important;
+  color:#1b1b1b !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -2px 0 rgba(0,0,0,.18),
+    0 10px 22px rgba(0,0,0,.22) !important;
+  position:relative;
+}
+.hab.por-vencer::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:10px;
+  background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.45), rgba(255,255,255,0) 55%);
+  pointer-events:none;
+}
+
+/* Marcador lógico para conteo (no visual) */
+.hab.al-dia{}
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index: 2000;
+  padding: 18px;
+}
+.overlay.show{ display:flex; }
+
+.modal{
+  width: min(640px, 100%);
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: linear-gradient(180deg, rgba(16,25,38,.96), rgba(16,25,38,.76));
+  box-shadow: 0 24px 70px rgba(0,0,0,.65);
+  overflow:hidden;
+}
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+.modal-title{
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+.modal-close{
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color:#fff;
+  cursor:pointer;
+}
+.modal-body{ padding: 14px 16px 8px 16px; }
+.modal-footer{
+  display:flex;
+  gap: 10px;
+  justify-content:flex-end;
+  padding: 12px 16px 16px 16px;
+  border-top: 1px solid rgba(255,255,255,.10);
+  flex-wrap:wrap;
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 560px){
+  .grid2{ grid-template-columns: 1fr; }
+}
+
+.field{ display:flex; flex-direction:column; gap:6px; }
+.label{ font-size: 12px; opacity:.85; }
+.input{
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  padding: 10px 12px;
+  color:#fff;
+  outline:none;
+}
+.input:focus{ border-color: rgba(255,255,255,.30); }
+
+.radios{ display:flex; flex-wrap:wrap; gap:10px; }
+.radio{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
+  font-size: 12px;
+}
+
+.hint{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px dashed rgba(255,255,255,.16);
+  background: rgba(255,255,255,.03);
+  font-size: 12px;
+  color: rgba(255,255,255,.85);
+  line-height: 1.35;
+}
+
+.btn{
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color:#fff;
+  padding: 10px 12px;
+  cursor:pointer;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.btn.primary{ background: linear-gradient(145deg, #1f7f5c, #55d6a3); border-color: rgba(255,255,255,.10); }
+.btn.warn{ background: linear-gradient(145deg, var(--yellow1), var(--yellow2)); color:#151515; border-color: rgba(0,0,0,.12); }
+.btn.danger{ background: linear-gradient(145deg, #b21a1a, #ff5b5b); border-color: rgba(255,255,255,.10); }
+.btn.ghost{ background: transparent; }
+
+.fab{
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 1500;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(16,25,38,.88);
+  color:#fff;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 34px rgba(0,0,0,.45);
+  cursor:pointer;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.table{
+  width:100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.table th, .table td{
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  vertical-align: top;
+}
+.table th{ text-align:left; opacity:.9; position: sticky; top: 0; background: rgba(16,25,38,.95); }
+.small{ font-size: 12px; opacity:.8; }
+
 </style>
 </head>
 <body>
@@ -627,9 +827,110 @@
     </div>
   </div>
 
-  <div class="av-note" id="avNote">Verde aperlado = pulida · Rojo aperlado = pendiente</div>
+  <div class="av-note" id="avNote">Verde aperlado = al día · Amarillo aperlado = por vencer / en proceso · Rojo aperlado = vencido / sin registro</div>
 </div>
 
+
+
+
+<!-- BOTON · MOVIMIENTOS -->
+<button class="fab" id="openMov" title="Ver movimientos">Movimientos</button>
+
+<!-- MODAL · REGISTRO DE AVANCE -->
+<div class="overlay" id="regOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="regTitle">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="regTitle">Registro de avance</div>
+        <div class="small" id="regSub">Pulidos · Semáforo operativo</div>
+      </div>
+      <button class="modal-close" id="regClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2">
+        <div class="field">
+          <div class="label">Habitación</div>
+          <input class="input" id="regRoom" type="text" inputmode="numeric" placeholder="Ej. 2310" />
+        </div>
+        <div class="field">
+          <div class="label">Fecha</div>
+          <input class="input" id="regDate" type="date" />
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="label">Responsable (quién realizó el pulido)</div>
+          <input class="input" id="regResp" type="text" placeholder="Nombre del responsable" />
+        </div>
+
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="label">Comentarios (situación / observación)</div>
+          <textarea class="input" id="regComment" rows="3" placeholder="Escribe un comentario si aplica…" style="resize:vertical; min-height:86px;"></textarea>
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="label">Estatus</div>
+          <div class="radios">
+            <label class="radio"><input type="radio" name="regStatus" value="en_proceso" checked> En proceso (amarillo)</label>
+            <label class="radio"><input type="radio" name="regStatus" value="pulida"> Completada (verde)</label>
+          </div>
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="label">Candado</div>
+          <input class="input" id="regPin" type="password" placeholder="Clave para registrar" />
+        </div>
+      </div>
+
+      <div class="hint" id="regHint">Selecciona una habitación y registra el estatus. El sistema calculará los días restantes para el próximo pulido (mínimo 2 por año).</div>
+
+      <div class="hint" style="margin-top:10px;">
+        <div style="font-weight:800; margin-bottom:6px;">Historial de pulido (consulta por habitación)</div>
+        <div class="small" id="roomHistMeta" style="margin-bottom:8px; opacity:.85;">—</div>
+        <div id="roomHistList" style="display:flex; flex-direction:column; gap:8px;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn danger" id="regDelete" title="Borrar registro (requiere clave)">Borrar</button>
+      <button class="btn ghost" id="regCancel">Cancelar</button>
+      <button class="btn warn" id="regSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL · MOVIMIENTOS / HISTORIAL -->
+<div class="overlay" id="logOverlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="logTitle">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="logTitle">Movimientos</div>
+        <div class="small">Historial de acciones (alta / cambio / borrado)</div>
+      </div>
+      <button class="modal-close" id="logClose" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid2" style="margin-bottom:10px;">
+        <div class="field" style="grid-column:1 / -1;">
+          <div class="label">Filtro por habitación</div>
+          <input class="input" id="logFilter" type="text" inputmode="numeric" placeholder="Ej. 2310" />
+        </div>
+      </div>
+      <div style="max-height: 360px; overflow:auto; border-radius:16px; border:1px solid rgba(255,255,255,.10);">
+        <table class="table" id="logTable">
+          <thead>
+            <tr>
+              <th>Fecha/Hora</th>
+              <th>Acción</th>
+              <th>Hab</th>
+              <th>Detalle</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="small" style="margin-top:10px; opacity:.8;">Tip: este historial se guardará en base de datos cuando conectemos Supabase. Por ahora se conserva localmente en este navegador.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn ghost" id="logOk">Cerrar</button>
+    </div>
+  </div>
+</div>
 
 <div class="layout">
 
@@ -1142,7 +1443,7 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
 
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   document.querySelectorAll('.torre').forEach(torre => {
     let k = 0, m = 0;
     torre.querySelectorAll('.hab .tipo').forEach(t => {
@@ -1156,176 +1457,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mSpan) mSpan.textContent = m;
   });
 
-  // === Base de datos de pulidos (último pulido) ===
-  const PULIDOS = {
-  "2101": "2025-06-07",
-  "2102": "2025-06-07",
-  "2103": "2025-06-07",
-  "2104": "2025-06-07",
-  "2105": "2025-06-07",
-  "2106": "2025-06-07",
-  "2107": "2025-06-07",
-  "2108": "2025-06-07",
-  "2201": "2025-06-07",
-  "2202": "2025-06-07",
-  "2203": "2025-06-07",
-  "2204": "2025-06-07",
-  "2205": "2025-06-10",
-  "2206": "2025-06-09",
-  "2207": "2025-06-07",
-  "2208": "2025-06-07",
-  "2209": "2025-06-07",
-  "2210": "2025-06-07",
-  "2301": "2025-06-11",
-  "2302": "2025-06-10",
-  "2303": "2025-06-09",
-  "2304": "2025-06-08",
-  "2305": "2025-06-07",
-  "2306": "2025-06-06",
-  "2307": "2025-06-05",
-  "2308": "2025-06-11",
-  "2309": "2025-06-03",
-  "2310": "2025-06-03",
-  "2401": "2025-06-16",
-  "2402": "2025-06-16",
-  "2403": "2025-06-16",
-  "2404": "2025-06-16",
-  "2405": "2025-06-16",
-  "2406": "2025-06-16",
-  "2407": "2025-06-08",
-  "2408": "2025-06-16",
-  "2409": "2025-06-28",
-  "2410": "2025-06-17",
-  "2501": "2025-06-16",
-  "2502": "2025-07-06",
-  "2503": "2025-06-18",
-  "2504": "2025-07-11",
-  "2505": "2025-06-16",
-  "2506": "2025-06-25",
-  "2507": "2025-06-12",
-  "2508": "2025-06-16",
-  "2509": "2025-06-16",
-  "2510": "2025-06-16",
-  "2601": "2025-06-16",
-  "2602": "2025-06-25",
-  "2603": "2025-06-16",
-  "2604": "2025-06-16",
-  "2605": "2025-05-30",
-  "2606": "2025-06-16",
-  "2607": "2025-06-16",
-  "2608": "2025-06-16",
-  "2609": "2025-06-16",
-  "2610": "2025-06-16",
-  "2701": "2025-06-16",
-  "2702": "2025-06-16",
-  "2703": "2025-06-16",
-  "2704": "2025-06-16",
-  "2705": "2025-06-16",
-  "2706": "2025-06-16",
-  "2707": "2025-06-16",
-  "2708": "2025-06-16",
-  "2709": "2025-06-16",
-  "2710": "2025-06-16",
-  "4112": "2025-06-27",
-  "4114": "2025-07-10",
-  "4115": "2025-07-10",
-  "4116": "2025-07-13",
-  "4117": "2025-07-13",
-  "4118": "2025-07-09",
-  "4119": "2025-07-11",
-  "4120": "2025-07-14",
-  "4121": "2025-07-16",
-  "4122": "2025-07-17",
-  "4123": "2025-07-15",
-  "4124": "2025-07-01",
-  "4125": "2025-06-30",
-  "4126": "2025-07-18",
-  "4127": "2025-07-23",
-  "4128": "2025-08-08",
-  "4129": "2025-07-18",
-  "4130": "2025-08-08",
-  "4131": "2025-08-13",
-  "4132": "2025-08-13",
-  "4212": "2025-08-16",
-  "4217": "2025-12-14",
-  "4222": "2025-12-13",
-  "4230": "2025-12-05",
-  "4406": "2025-11-13",
-  "4415": "2025-12-08",
-  "4418": "2025-11-25",
-  "4421": "2025-11-29",
-  "4431": "2025-11-13",
-  "4507": "2025-11-28",
-  "4508": "2025-11-28",
-  "4518": "2025-06-03",
-  "4521": "2025-06-24",
-  "4524": "2025-12-11",
-  "4529": "2025-11-26",
-  "4601": "2025-09-13",
-  "4602": "2025-09-09",
-  "4603": "2025-12-03",
-  "4604": "2025-12-15",
-  "4605": "2025-09-11",
-  "4607": "2025-05-17",
-  "4608": "2025-11-27",
-  "4609": "2025-09-01",
-  "4610": "2025-08-29",
-  "4611": "2025-08-29",
-  "4612": "2025-08-31",
-  "4614": "2025-06-23",
-  "4615": "2025-11-24",
-  "4616": "2025-06-03",
-  "4617": "2025-12-14",
-  "4620": "2025-08-30",
-  "4621": "2025-12-17",
-  "4622": "2025-09-12",
-  "4623": "2025-09-02",
-  "4624": "2025-09-08",
-  "4626": "2025-09-06",
-  "4629": "2025-09-13",
-  "4631": "2025-08-30",
-  "4632": "2025-09-13",
-  "4633": "2025-09-08",
-  "4701": "2025-09-15",
-  "4702": "2025-09-17",
-  "4703": "2025-07-22",
-  "4704": "2025-09-29",
-  "4705": "2025-12-11",
-  "4706": "2025-09-27",
-  "4707": "2025-05-14",
-  "4709": "2025-11-28",
-  "4710": "2025-12-16",
-  "4711": "2025-09-16",
-  "4712": "2025-09-27",
-  "4714": "2025-11-15",
-  "4715": "2025-09-20",
-  "4716": "2025-11-21",
-  "4717": "2025-08-18",
-  "4718": "2025-11-24",
-  "4719": "2025-09-20",
-  "4720": "2025-12-16",
-  "4722": "2025-12-02",
-  "4724": "2025-07-20",
-  "4725": "2025-10-21",
-  "4726": "2025-07-21",
-  "4728": "2025-11-15",
-  "4729": "2025-12-09",
-  "4730": "2025-10-20",
-  "4731": "2025-12-13",
-  "4732": "2025-11-22",
-  "4733": "2025-10-20",
-  "4324": "2026-01-07",
-  "4424": "2026-01-07",
-  "4425": "2026-01-08",
-  "4332": "2026-01-12",
-  "4333": "2026-01-13",
-	    "4319": "2026-01-15",
-	  	"4519": "2026-01-17",
-		"4233": "2026-01-18"
+  
 
-	  
-};
+  // === Pulidos · Sistema virgen con registro + historial ===
+  // Cambia esta clave cuando quieras.
+  const PIN_WRITE = '1234';
 
+  // === Supabase (Nube) ===
+  // 1) Pega tu ANON KEY aqui (Project Settings > API > anon public)
+  // 2) (Opcional) cambia el nombre de hotel para separar instalaciones
+  const SUPABASE_URL = 'https://dmjvltvkimowrmhzoamh.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_vxdLQ3U83cyKDWkJ9zjV0A_29vS4IGa';
+  const HOTEL_NAME = 'Krystal Grand Los Cabos';
+
+  const supabase = (window.supabase && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== 'PEGA_AQUI_TU_ANON_KEY')
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  const STORAGE_STATE = 'pulidos_state_v1';
+  const STORAGE_LOG = 'pulidos_log_v1';
+  const DAYS_BETWEEN_PULIDOS = 183; // 2 por año aprox.
+
+  const todayISO = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${dd}`;
+  };
 
   const fmt = (iso) => {
     const [y,m,d] = String(iso).split('-');
@@ -1333,24 +1492,756 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${d}/${m}/${y}`;
   };
 
-  // Default: rojo aperlado. Si tiene fecha: verde aperlado + tooltip con fecha.
-  document.querySelectorAll('.hab').forEach(h => {
-    const numEl = h.querySelector('.num');
-    const num = numEl ? numEl.textContent.trim() : '';
-    h.classList.add('no-pulida');
-    h.classList.remove('pulida');
+  const toDate = (iso) => {
+    const m = /^([0-9]{4})-([0-9]{2})-([0-9]{2})$/.exec(String(iso||''));
+    if(!m) return null;
+    return new Date(Number(m[1]), Number(m[2])-1, Number(m[3]));
+  };
 
-    const fecha = PULIDOS[num];
-    if (fecha) {
-      h.classList.remove('no-pulida');
-      h.classList.add('pulida');
-      h.setAttribute('title', `Pulido: ${fmt(fecha)}`);
-    } else {
-      h.removeAttribute('title');
+  const addDays = (d, days) => {
+    const x = new Date(d.getTime());
+    x.setDate(x.getDate() + days);
+    return x;
+  };
+
+  const diffDays = (a, b) => {
+    const ms = 24*60*60*1000;
+    return Math.ceil((a.getTime() - b.getTime()) / ms);
+  };
+
+  const loadJSON = (key, fallback) => {
+    try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+    catch(e){ return fallback; }
+  };
+  const saveJSON = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+
+  const state = loadJSON(STORAGE_STATE, { rooms: {} });
+  const log = loadJSON(STORAGE_LOG, []);
+
+  function logAction(entry){
+    log.unshift(entry);
+    if(log.length > 600) log.length = 600;
+    saveJSON(STORAGE_LOG, log);
+  }
+
+  // === Supabase helpers (cloud) ===
+  // Nota: la anon key es publica; la seguridad real la dan RLS + policies.
+  const DB = {
+    estado: 'pulidos_estado',
+    log: 'pulidos_log',
+    // Columnas (ajusta aqui si en tu tabla usaste otros nombres)
+    cHotel: 'hotel',
+    cRoom: 'habitacion',
+    cStatus: 'estado',
+    cDoneDate: 'done_date',
+    cResp: 'responsable',
+    cComment: 'comentarios',
+    cUpdatedBy: 'updated_by',
+    cUpdatedAt: 'updated_at',
+    cAction: 'accion',
+    cOld: 'old_data',
+    cNew: 'new_data',
+    cActor: 'actor',
+    cCreatedAt: 'created_at'
+  };
+
+  function mountCloudWidget(){
+    // Widget discreto arriba-derecha
+    const box = document.createElement('div');
+    box.id = 'cloudWidget';
+    box.style.cssText = 'position:fixed;top:12px;right:12px;z-index:9999;background:rgba(17,28,38,.92);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:10px 12px;backdrop-filter: blur(8px);display:flex;gap:10px;align-items:center;'
+    box.innerHTML = `
+      <div style="display:flex;flex-direction:column;line-height:1.1;">
+        <div style="font-size:12px;opacity:.85;">Nube</div>
+        <div id="cloudStatus" style="font-size:12px;font-weight:700;">Desconectado</div>
+      </div>
+      <button id="cloudLoginBtn" style="cursor:pointer;border:0;border-radius:12px;padding:8px 10px;font-weight:800;background:#1f97a8;color:#071118;">Conectar</button>
+      <button id="cloudLogoutBtn" style="cursor:pointer;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:8px 10px;font-weight:800;background:transparent;color:#f4f7ff;display:none;">Salir</button>
+    `;
+    document.body.appendChild(box);
+  }
+
+  function setCloudStatus(txt){
+    const el = document.getElementById('cloudStatus');
+    if(el) el.textContent = txt;
+  }
+
+  async function cloudGetUser(){
+    if(!supabase) return null;
+    const { data } = await supabase.auth.getUser();
+    return data?.user || null;
+  }
+
+  async function cloudEnsureLogin(){
+    if(!supabase) {
+      alert('Falta pegar tu ANON KEY en el HTML (SUPABASE_ANON_KEY).');
+      return null;
     }
+    const user = await cloudGetUser();
+    if(user) return user;
+
+    const email = prompt('Correo (Supabase Auth):');
+    if(!email) return null;
+    const password = prompt('Contraseña:');
+    if(!password) return null;
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error){
+      alert('No se pudo iniciar sesión: ' + error.message);
+      return null;
+    }
+    return data.user || null;
+  }
+
+  async function cloudLogout(){
+    if(!supabase) return;
+    await supabase.auth.signOut();
+  }
+
+  async function cloudLoadEstado(){
+    if(!supabase) return false;
+    // Trae el estado actual (una fila por habitacion)
+    const { data, error } = await supabase
+      .from(DB.estado)
+      .select('*')
+      .eq(DB.cHotel, HOTEL_NAME);
+
+    if(error){
+      console.warn('Supabase load error:', error);
+      return false;
+    }
+
+    // Normaliza a nuestro state local
+    (data || []).forEach(row => {
+      const room = String(row[DB.cRoom] ?? '').trim();
+      if(!room) return;
+      const status = String(row[DB.cStatus] ?? 'pendiente');
+      const done = row[DB.cDoneDate] ? String(row[DB.cDoneDate]) : null;
+      const responsable = row[DB.cResp] ? String(row[DB.cResp]) : '';
+      const comentarios = row[DB.cComment] ? String(row[DB.cComment]) : '';
+
+      state.rooms[room] = state.rooms[room] || {};
+      if(status === 'en_proceso'){
+        state.rooms[room].status = 'en_proceso';
+        state.rooms[room].in_process_date = done || todayISO();
+        state.rooms[room].in_process_resp = responsable;
+        state.rooms[room].in_process_comment = comentarios;
+      } else if(status === 'completada'){
+        state.rooms[room].status = 'completada';
+        state.rooms[room].history = Array.isArray(state.rooms[room].history) ? state.rooms[room].history : [];
+        if(done && !state.rooms[room].history.includes(done)) state.rooms[room].history.push(done);
+      } else {
+        state.rooms[room].status = 'pendiente';
+      }
+    });
+
+    saveJSON(STORAGE_STATE, state);
+    return true;
+  }
+
+  async function cloudUpsertEstado(payload){
+    if(!supabase) return { ok:false, error: new Error('Supabase no configurado') };
+    const { error } = await supabase
+      .from(DB.estado)
+      .upsert(payload, { onConflict: `${DB.cHotel},${DB.cRoom}` });
+    return error ? { ok:false, error } : { ok:true };
+  }
+
+  async function cloudDeleteEstado(room){
+    if(!supabase) return { ok:false, error: new Error('Supabase no configurado') };
+    const { error } = await supabase
+      .from(DB.estado)
+      .delete()
+      .eq(DB.cHotel, HOTEL_NAME)
+      .eq(DB.cRoom, room);
+    return error ? { ok:false, error } : { ok:true };
+  }
+
+  async function cloudInsertLog(payload){
+    if(!supabase) return { ok:false, error: new Error('Supabase no configurado') };
+    const { error } = await supabase
+      .from(DB.log)
+      .insert(payload);
+    return error ? { ok:false, error } : { ok:true };
+  }
+
+  async function cloudLoadRoomHistory(room){
+    if(!supabase) return [];
+    // Historial por habitacion (para mostrar en modal)
+    const { data, error } = await supabase
+      .from(DB.log)
+      .select('*')
+      .eq(DB.cHotel, HOTEL_NAME)
+      .eq(DB.cRoom, room)
+      .order(DB.cCreatedAt, { ascending:false })
+      .limit(50);
+    if(error){
+      console.warn('Supabase history error:', error);
+      return [];
+    }
+    return data || [];
+  }
+
+  function ensureDataAttributes(){
+    document.querySelectorAll('section.torre').forEach(sec => {
+      if(sec.dataset.torre) return;
+      const h = sec.querySelector('.torre-header');
+      const t = h ? h.textContent.toUpperCase() : '';
+      if(t.includes('ALTITUDE')) sec.dataset.torre = 'ALTITUDE';
+      else if(t.includes('PALMILLA')) sec.dataset.torre = 'PALMILLA';
+      else if(t.includes('UNIQUE')) sec.dataset.torre = 'UNIQUE';
+    });
+    document.querySelectorAll('.hab').forEach(h => {
+      if(h.dataset.room) return;
+      const numEl = h.querySelector('.num');
+      const num = numEl ? numEl.textContent.trim() : '';
+      if(num) h.dataset.room = num;
+    });
+  }
+
+  function getLastCompletedISO(room){
+    const info = state.rooms[room];
+    const hist = info && Array.isArray(info.history) ? info.history : [];
+    if(!hist.length) return null;
+    return hist.slice().sort().pop();
+  }
+
+  function setTooltip(habEl){
+    const room = habEl.dataset.room;
+    const info = state.rooms[room];
+
+    if(info && info.status === 'en_proceso'){
+      const f = info.in_process_date || todayISO();
+      habEl.title = `En proceso: ${fmt(f)}`;
+      return;
+    }
+
+    const lastISO = getLastCompletedISO(room);
+    if(!lastISO){
+      habEl.title = 'Pendiente · Sin registros';
+      return;
+    }
+
+    const lastD = toDate(lastISO);
+    if(!lastD){
+      habEl.title = `Último pulido: ${fmt(lastISO)}`;
+      return;
+    }
+
+    const next = addDays(lastD, DAYS_BETWEEN_PULIDOS);
+    const days = diffDays(next, new Date());
+    const nextISO = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+
+    const dueTxt = (days >= 0)
+      ? `Faltan ${days} días para próximo pulido`
+      : `Vencido por ${Math.abs(days)} días`;
+
+    habEl.title = `Último pulido: ${fmt(lastISO)} · Próximo: ${fmt(nextISO)} · ${dueTxt}`;
+  }
+
+  function applyStateToDOM(){
+    document.querySelectorAll('.hab').forEach(h => {
+      const room = h.dataset.room;
+      h.classList.remove('pulida','en-proceso','no-pulida','por-vencer','al-dia');
+
+      const info = room ? state.rooms[room] : null;
+
+      // 1) Sin registro => rojo
+      if(!info){
+        h.classList.add('no-pulida');
+        setTooltip(h);
+        return;
+      }
+
+      // 2) En proceso (manual) => amarillo con pulso
+      if(info.status === 'en_proceso'){
+        h.classList.add('en-proceso');
+        setTooltip(h);
+        return;
+      }
+
+      // 3) Completada: decide color por tiempo (2 por año)
+      const lastISO = getLastCompletedISO(room);
+      if(!lastISO){
+        h.classList.add('no-pulida');
+        setTooltip(h);
+        return;
+      }
+
+      const lastD = toDate(lastISO);
+      if(!lastD){
+        // Si la fecha está rara, la damos por 'al día' para no bloquear operación
+        h.classList.add('pulida','al-dia');
+        setTooltip(h);
+        return;
+      }
+
+      const next = addDays(lastD, DAYS_BETWEEN_PULIDOS);
+      const daysLeft = diffDays(next, new Date());
+
+      if(daysLeft < 0){
+        // Vencida => rojo (no cuenta como pulida vigente)
+        h.classList.add('no-pulida');
+      } else if(daysLeft <= 30){
+        // Por vencer => amarillo sin pulso (sí cuenta como al día)
+        h.classList.add('por-vencer','al-dia');
+      } else {
+        // Vigente => verde (al día)
+        h.classList.add('pulida','al-dia');
+      }
+
+      setTooltip(h);
+    });
+
+    saveJSON(STORAGE_STATE, state);
+    if(typeof updateAvances === 'function') updateAvances();
+  }
+
+  ensureDataAttributes();
+  mountCloudWidget();
+
+  // Conecta a nube (opcional). Si no hay sesión, funciona local hasta que inicies sesión.
+  if(!supabase){
+    setCloudStatus('Falta ANON KEY');
+    const btn = document.getElementById('cloudLoginBtn');
+    if(btn) btn.textContent = 'Configurar';
+  } else {
+    const loginBtn = document.getElementById('cloudLoginBtn');
+    const logoutBtn = document.getElementById('cloudLogoutBtn');
+
+    const refreshAuthUI = async () => {
+      const u = await cloudGetUser();
+      if(u){
+        setCloudStatus((u.email || 'Conectado'));
+        if(loginBtn) loginBtn.style.display = 'none';
+        if(logoutBtn) logoutBtn.style.display = 'inline-block';
+      } else {
+        setCloudStatus('Desconectado');
+        if(loginBtn) loginBtn.style.display = 'inline-block';
+        if(logoutBtn) logoutBtn.style.display = 'none';
+      }
+    };
+
+    if(loginBtn){
+      loginBtn.addEventListener('click', async () => {
+        const u = await cloudEnsureLogin();
+        if(u){
+          await cloudLoadEstado();
+          applyStateToDOM();
+        }
+        await refreshAuthUI();
+      });
+    }
+
+    if(logoutBtn){
+      logoutBtn.addEventListener('click', async () => {
+        await cloudLogout();
+        await refreshAuthUI();
+      });
+    }
+
+    // Si ya hay sesión guardada, cargamos nube al abrir
+    await refreshAuthUI();
+    const u0 = await cloudGetUser();
+    if(u0){
+      await cloudLoadEstado();
+    }
+  }
+
+  applyStateToDOM();
+
+  // === REGISTRO (MODAL) ===
+  const regOverlay = document.getElementById('regOverlay');
+  const regRoom = document.getElementById('regRoom');
+  const regDate = document.getElementById('regDate');
+  const regResp = document.getElementById('regResp');
+  const regComment = document.getElementById('regComment');
+  const regPin  = document.getElementById('regPin');
+  const regHint = document.getElementById('regHint');
+
+  async function openRegModal(room){
+    regRoom.value = room || '';
+    regDate.value = todayISO();
+    regResp.value = '';
+    if(regComment) regComment.value = '';
+    regPin.value = '';
+
+    const lastISO = room ? getLastCompletedISO(room) : null;
+    const lastTxt = lastISO ? fmt(lastISO) : 'Sin registros';
+    regHint.textContent = `Habitación ${room} · Último pulido: ${lastTxt}.`; 
+
+    const r = document.querySelector('input[name="regStatus"][value="en_proceso"]');
+    if(r) r.checked = true;
+
+    // Historial local (siempre)
+    renderRoomHistory(room);
+
+    // Si hay sesión en Supabase, muestra historial real de nube para esa habitación
+    if(supabase){
+      const u = await cloudGetUser();
+      if(u){
+        const rows = await cloudLoadRoomHistory(String(room||''));
+        if(rows && rows.length) renderRoomHistoryCloud(String(room||''), rows);
+      }
+    }
+
+    regOverlay.classList.add('show');
+    regOverlay.setAttribute('aria-hidden','false');
+  }
+  function closeRegModal(){
+    regOverlay.classList.remove('show');
+    regOverlay.setAttribute('aria-hidden','true');
+  }
+
+  document.getElementById('regClose')?.addEventListener('click', closeRegModal);
+  document.getElementById('regCancel')?.addEventListener('click', closeRegModal);
+  regOverlay?.addEventListener('click', (e)=>{ if(e.target === regOverlay) closeRegModal(); });
+
+  function selectedStatus(){
+    const s = document.querySelector('input[name="regStatus"]:checked');
+    return s ? s.value : 'en_proceso';
+  }
+
+  function requirePin(){
+    const pin = String(regPin.value || '').trim();
+    if(pin !== PIN_WRITE){
+      regHint.textContent = '🔒 Clave incorrecta. No se registró ningún cambio.';
+      return false;
+    }
+    return true;
+  }
+
+  function escapeHTML(s){
+    return String(s||'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  function renderRoomHistory(room){
+    const meta = document.getElementById('roomHistMeta');
+    const list = document.getElementById('roomHistList');
+    if(!meta || !list) return;
+
+    const roomStr = String(room||'');
+    const entries = log
+      .filter(e => String(e.room||'') === roomStr && (e.action === 'crear' || e.action === 'actualizar'))
+      .slice(0, 12);
+
+    const completed = entries.filter(e => e.status === 'pulida' && e.date);
+    if(completed.length){
+      meta.textContent = 'Último pulido completado: ' + fmt(completed[0].date) + ' · ' + completed.length + ' completado(s) en historial';
+    } else {
+      meta.textContent = 'Sin pulidos completados aún. (Aquí verás también "En proceso" y cambios.)';
+    }
+
+    list.innerHTML = '';
+    if(!entries.length){
+      list.innerHTML = '<div class="small" style="opacity:.8;">—</div>';
+      return;
+    }
+
+    for(const e of entries){
+      const box = document.createElement('div');
+      box.style.border = '1px solid rgba(255,255,255,.10)';
+      box.style.borderRadius = '12px';
+      box.style.padding = '8px 10px';
+      box.style.background = 'rgba(16,25,38,.55)';
+
+      const top = document.createElement('div');
+      top.style.display = 'flex';
+      top.style.justifyContent = 'space-between';
+      top.style.gap = '8px';
+      top.style.alignItems = 'baseline';
+
+      const tag = document.createElement('div');
+      tag.style.fontWeight = '700';
+      tag.textContent = (e.status === 'pulida') ? 'Completada' : 'En proceso';
+
+      const when = document.createElement('div');
+      when.className = 'small';
+      when.style.opacity = '.85';
+      when.textContent = e.date ? fmt(e.date) : '';
+
+      top.appendChild(tag);
+      top.appendChild(when);
+
+      const resp = document.createElement('div');
+      resp.className = 'small';
+      resp.style.marginTop = '4px';
+      resp.textContent = 'Resp.: ' + (e.responsable ? e.responsable : '—');
+
+      box.appendChild(top);
+      box.appendChild(resp);
+
+      if(e.comment){
+        const c = document.createElement('div');
+        c.className = 'small';
+        c.style.marginTop = '4px';
+        c.style.opacity = '.95';
+        c.innerHTML = 'Comentario: ' + escapeHTML(e.comment);
+        box.appendChild(c);
+      }
+
+      list.appendChild(box);
+    }
+  }
+
+  // Render del historial usando filas reales de Supabase (si hay sesión)
+  function renderRoomHistoryCloud(room, rows){
+    const meta = document.getElementById('roomHistMeta');
+    const list = document.getElementById('roomHistList');
+    if(!meta || !list) return;
+
+    const entries = (rows || []).map(r => {
+      const action = String(r[DB.cAction] || 'actualizar');
+      const createdAt = r[DB.cCreatedAt] ? new Date(r[DB.cCreatedAt]) : null;
+      const newData = r[DB.cNew] || {};
+      const status = String(newData[DB.cStatus] || '');
+      const date = newData[DB.cDoneDate] || null;
+      const responsable = String(newData[DB.cResp] || '');
+      const comment = String(r[DB.cComment] || newData[DB.cComment] || '');
+      return { action, createdAt, status, date, responsable, comment };
+    }).filter(e => (e.action === 'crear' || e.action === 'actualizar' || e.action === 'eliminar'));
+
+    const completed = entries.filter(e => (e.status === 'completada' || e.status === 'pulida') && e.date);
+    if(completed.length){
+      meta.textContent = 'Último pulido completado (nube): ' + fmt(completed[0].date) + ' · ' + completed.length + ' completado(s)';
+    } else {
+      meta.textContent = 'Historial (nube): sin pulidos completados aún.';
+    }
+
+    list.innerHTML = '';
+    if(!entries.length){
+      list.innerHTML = '<div class="small" style="opacity:.8;">—</div>';
+      return;
+    }
+
+    for(const e of entries.slice(0, 12)){
+      const box = document.createElement('div');
+      box.style.border = '1px solid rgba(255,255,255,.10)';
+      box.style.borderRadius = '12px';
+      box.style.padding = '8px 10px';
+      box.style.background = 'rgba(16,25,38,.55)';
+
+      const top = document.createElement('div');
+      top.style.display = 'flex';
+      top.style.justifyContent = 'space-between';
+      top.style.gap = '8px';
+      top.style.alignItems = 'baseline';
+
+      const tag = document.createElement('div');
+      tag.style.fontWeight = '700';
+      const st = (e.status === 'completada' || e.status === 'pulida') ? 'Completada' : 'En proceso';
+      tag.textContent = st;
+
+      const when = document.createElement('div');
+      when.className = 'small';
+      when.style.opacity = '.85';
+      when.textContent = e.date ? fmt(e.date) : (e.createdAt ? e.createdAt.toLocaleString() : '');
+
+      top.appendChild(tag);
+      top.appendChild(when);
+
+      const resp = document.createElement('div');
+      resp.className = 'small';
+      resp.style.marginTop = '4px';
+      resp.textContent = 'Resp.: ' + (e.responsable ? e.responsable : '—');
+
+      box.appendChild(top);
+      box.appendChild(resp);
+
+      if(e.comment){
+        const c = document.createElement('div');
+        c.className = 'small';
+        c.style.marginTop = '4px';
+        c.style.opacity = '.95';
+        c.innerHTML = 'Comentario: ' + escapeHTML(e.comment);
+        box.appendChild(c);
+      }
+
+      list.appendChild(box);
+    }
+  }
+
+  async function upsertRoom(room, status, dateISO, responsable, comment){
+    const prev = state.rooms[room] ? JSON.parse(JSON.stringify(state.rooms[room])) : null;
+    const next = state.rooms[room] || { status: 'pendiente', history: [] };
+
+    if(status === 'en_proceso'){
+      next.status = 'en_proceso';
+      next.in_process_date = dateISO;
+      next.responsable = responsable;
+      next.comment = comment || '';
+    } else {
+      next.status = 'pulida';
+      next.in_process_date = null;
+      next.responsable = responsable;
+      next.comment = comment || '';
+      next.history = Array.isArray(next.history) ? next.history : [];
+      if(dateISO) next.history.push(dateISO);
+    }
+
+    state.rooms[room] = next;
+
+    logAction({
+      ts: new Date().toISOString(),
+      action: prev ? 'actualizar' : 'crear',
+      room,
+      status: next.status,
+      date: dateISO,
+      responsable: responsable || '',
+      comment: comment || '',
+      prev,
+      next
+    });
+
+    // === NUBE: guarda estado + auditoría (si hay sesión) ===
+    if(supabase){
+      const user = await cloudGetUser();
+      if(user){
+        const now = new Date().toISOString();
+        const dbStatus = (status === 'en_proceso') ? 'en_proceso' : 'completada';
+        const payload = {
+          [DB.cHotel]: HOTEL_NAME,
+          [DB.cRoom]: String(room),
+          [DB.cStatus]: dbStatus,
+          [DB.cDoneDate]: dateISO || null,
+          [DB.cResp]: responsable || null,
+          [DB.cComment]: comment || null,
+          [DB.cUpdatedBy]: user.id,
+          [DB.cUpdatedAt]: now
+        };
+
+        const oldData = prev ? {
+          status: prev.status || 'pendiente',
+          history: prev.history || [],
+          in_process_date: prev.in_process_date || null,
+          responsable: prev.responsable || '',
+          comment: prev.comment || ''
+        } : null;
+
+        const up = await cloudUpsertEstado(payload);
+        if(!up.ok){
+          alert('⚠️ No se pudo guardar en nube (estado): ' + up.error.message);
+        } else {
+          const lp = await cloudInsertLog({
+            [DB.cHotel]: HOTEL_NAME,
+            [DB.cRoom]: String(room),
+            [DB.cAction]: prev ? 'actualizar' : 'crear',
+            [DB.cOld]: oldData,
+            [DB.cNew]: payload,
+            [DB.cComment]: comment || null,
+            [DB.cActor]: user.id
+          });
+          if(!lp.ok) alert('⚠️ No se pudo guardar en nube (log): ' + lp.error.message);
+        }
+      }
+    }
+
+    applyStateToDOM();
+    closeRegModal();
+  }
+
+  async function deleteRoom(room){
+    const prev = state.rooms[room] ? JSON.parse(JSON.stringify(state.rooms[room])) : null;
+    if(!prev){
+      regHint.textContent = 'No hay registro que borrar para esta habitación.';
+      return;
+    }
+    delete state.rooms[room];
+    logAction({ ts: new Date().toISOString(), action: 'borrar', room, prev });
+
+    // === NUBE: borra estado + auditoría (si hay sesión) ===
+    if(supabase){
+      const user = await cloudGetUser();
+      if(user){
+        const del = await cloudDeleteEstado(String(room));
+        if(!del.ok){
+          alert('⚠️ No se pudo borrar en nube (estado): ' + del.error.message);
+        } else {
+          const lp = await cloudInsertLog({
+            [DB.cHotel]: HOTEL_NAME,
+            [DB.cRoom]: String(room),
+            [DB.cAction]: 'eliminar',
+            [DB.cOld]: prev,
+            [DB.cNew]: null,
+            [DB.cComment]: null,
+            [DB.cActor]: user.id
+          });
+          if(!lp.ok) alert('⚠️ No se pudo guardar en nube (log): ' + lp.error.message);
+        }
+      }
+    }
+    applyStateToDOM();
+    closeRegModal();
+  }
+
+  document.getElementById('regSave')?.addEventListener('click', ()=>{
+    const room = String(regRoom.value||'').trim();
+    if(!room){ regHint.textContent = 'Ingresa una habitación.'; return; }
+    if(!requirePin()) return;
+    const status = selectedStatus();
+    const dateISO = String(regDate.value||todayISO());
+    const responsable = String(regResp.value||'').trim();
+    const comment = regComment ? String(regComment.value||'').trim() : '';
+    upsertRoom(room, status, dateISO, responsable, comment);
   });
 
+  document.getElementById('regDelete')?.addEventListener('click', ()=>{
+    const room = String(regRoom.value||'').trim();
+    if(!room){ regHint.textContent = 'Ingresa una habitación.'; return; }
+    if(!requirePin()) return;
+    deleteRoom(room);
+  });
 
+  // Click en habitación => abre modal
+  document.querySelectorAll('.hab').forEach(h => {
+    h.style.cursor = 'pointer';
+    h.addEventListener('click', ()=> openRegModal(h.dataset.room));
+  });
+
+  // === MOVIMIENTOS ===
+  const logOverlay = document.getElementById('logOverlay');
+  const logTableBody = document.querySelector('#logTable tbody');
+  const logFilter = document.getElementById('logFilter');
+
+  function openLog(){
+    logOverlay.classList.add('show');
+    logOverlay.setAttribute('aria-hidden','false');
+    renderLog();
+  }
+  function closeLog(){
+    logOverlay.classList.remove('show');
+    logOverlay.setAttribute('aria-hidden','true');
+  }
+
+  document.getElementById('openMov')?.addEventListener('click', openLog);
+  document.getElementById('logClose')?.addEventListener('click', closeLog);
+  document.getElementById('logOk')?.addEventListener('click', closeLog);
+  logOverlay?.addEventListener('click', (e)=>{ if(e.target === logOverlay) closeLog(); });
+  logFilter?.addEventListener('input', renderLog);
+
+  function renderLog(){
+    if(!logTableBody) return;
+    const f = String(logFilter.value||'').trim();
+    const rows = log.filter(e => !f || String(e.room||'').includes(f)).slice(0, 200);
+
+    logTableBody.innerHTML = rows.map(e => {
+      const when = (e.ts||'').replace('T',' ').replace('Z','');
+      const det = e.action === 'borrar'
+        ? 'Registro eliminado'
+        : `${e.status === 'en_proceso' ? 'En proceso' : 'Completada'} · ${e.date ? fmt(e.date) : ''} · ${e.responsable||''}`;
+      return `<tr>
+        <td>${when}</td>
+        <td>${e.action||''}</td>
+        <td>${e.room||''}</td>
+        <td>${det}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" style="opacity:.8;">Sin movimientos aún.</td></tr>';
+  }
 
   // === Avance por torre (Altitude / Palmilla / Unique) ===
   
@@ -1490,7 +2381,7 @@ function setPct(idPct, idBar, pct, done, total, color){
 
     const habs = Array.from(sec.querySelectorAll('.hab'));
     const total = habs.length;
-    const pulidas = habs.filter(h => h.classList.contains('pulida')).length;
+    const pulidas = habs.filter(h => h.classList.contains('al-dia')).length;
     const pct = total ? (pulidas / total) * 100 : 0;
     return { total, pulidas, pct };
   }
