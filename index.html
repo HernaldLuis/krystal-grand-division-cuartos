@@ -1536,7 +1536,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     cDoneDate: 'done_date',
     cResp: 'responsable',
     cComment: 'comentarios',
-    cUpdatedBy: 'updated_by',
     cUpdatedAt: 'updated_at',
     cAction: 'accion',
     cOld: 'old_data',
@@ -2111,7 +2110,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           [DB.cDoneDate]: dateISO || null,
           [DB.cResp]: responsable || null,
           [DB.cComment]: comment || null,
-          [DB.cUpdatedBy]: user.id,
           [DB.cUpdatedAt]: now
         };
 
