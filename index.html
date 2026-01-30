@@ -41,15 +41,18 @@
     }
     .layout{
         display:flex;
-        gap:12px;              /* cerca, pero sin tocarse */
-        align-items:flex-start;
-        justify-content:flex-start; /* evita que se metan debajo del modal */
-        flex-wrap:wrap;
+        flex-direction: column;   /* ✅ torres apiladas en vertical (como la versión original) */
+        gap:12px;
+        align-items:stretch;
+        justify-content:flex-start;
+        flex-wrap:nowrap;
+        overflow-x:hidden;        /* ✅ sin scroll horizontal en torres */
+        overflow-y:visible;
         padding: 16px 340px 28px 12px; /* deja espacio para el modal */
         box-sizing:border-box;
         width: 100%;
         max-width: 1200px;
-        margin: 0 auto;        /* estética centrada */
+        margin: 0 auto;
     }
 
 /* Reservamos espacio para el modal fijo (solo en pantallas medianas/grandes) */
@@ -77,7 +80,8 @@
         background:var(--card);
         border-radius:18px;
         border:1px solid var(--border-soft);
-        min-width:360px;
+        width: 100%;             /* ✅ ocupa todo el ancho disponible */
+        min-width: 0;            /* ✅ evita que fuerce layout horizontal */
         padding-bottom:10px;
         box-shadow:0 14px 30px rgba(0,0,0,.45);
     }
@@ -226,7 +230,11 @@
         align-items:center;
         justify-content:space-between;
         gap:14px;
-        flex-wrap:wrap;
+        flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width: thin;
     }
     .brand-title{
         font-weight:800;
@@ -412,6 +420,63 @@
   text-transform: uppercase;
   opacity:.95;
 }
+
+/* === VUELTAS (LIBRO DE PULIDOS) === */
+.vuelta-strip{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width: thin;
+  margin: 0 0 10px 0;
+  padding: 8px 10px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+}
+
+/* Scrollbar discreta para vueltas */
+.vuelta-strip::-webkit-scrollbar{height:8px;}
+.vuelta-strip::-webkit-scrollbar-thumb{background: rgba(255,255,255,.18); border-radius: 999px;}
+.vuelta-strip::-webkit-scrollbar-track{background: rgba(0,0,0,.12); border-radius: 999px;}
+.vuelta-btn{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.18);
+  color: var(--txt);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform .08s ease, background .12s ease, border-color .12s ease;
+  user-select:none;
+}
+.vuelta-btn:hover{ transform: translateY(-1px); border-color: rgba(255,255,255,.22); }
+.vuelta-btn.active{
+  background: linear-gradient(180deg, rgba(83,214,163,.30), rgba(83,214,163,.12));
+  border-color: rgba(83,214,163,.55);
+}
+.vuelta-add{
+  margin-left:auto;
+  display:flex;
+  gap:6px;
+  align-items:center;
+}
+.vuelta-add button{
+  border: 1px dashed rgba(255,255,255,.22);
+  background: rgba(255,255,255,.06);
+  color: var(--txt);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor:pointer;
+}
+.vuelta-hint{
+  font-size: 11px;
+  opacity:.75;
+}
 .av-item{ margin: 10px 0; }
 .av-row{
   display:flex;
@@ -508,7 +573,11 @@
       display:flex;
       gap:12px;
       align-items:center;
-      flex-wrap:wrap;
+      flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width: thin;
     }
     #piePulidos{
       flex:0 0 180px;
@@ -825,7 +894,11 @@
   justify-content:flex-end;
   padding: 12px 16px 16px 16px;
   border-top: 1px solid rgba(255,255,255,.10);
-  flex-wrap:wrap;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width: thin;
 }
 
 .grid2{
@@ -849,7 +922,11 @@
 }
 .input:focus{ border-color: rgba(255,255,255,.30); }
 
-.radios{ display:flex; flex-wrap:wrap; gap:10px; }
+.radios{ display:flex; flex-wrap:nowrap;
+  overflow-x:auto;
+  overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width: thin; gap:10px; }
 .radio{
   display:flex;
   align-items:center;
@@ -917,6 +994,37 @@
 .table th{ text-align:left; opacity:.9; position: sticky; top: 0; background: rgba(16,25,38,.95); }
 .small{ font-size: 12px; opacity:.8; }
 
+
+/* === AJUSTE AUTOMÁTICO DE ANCHO (sin cambiar altura) ===
+   Objetivo: que las habitaciones se “ensanchEN” según el contenedor y el tamaño de pantalla,
+   manteniendo la altura original.
+*/
+.fila,
+.fila-habitaciones,
+.fila-base,
+.rooms-row{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  align-items:flex-start;
+  justify-content:flex-start;
+  gap:8px !important;
+}
+
+/* “Cuadros” de habitación: más anchos en pantallas grandes/medianas, misma altura */
+.hab{
+  height:50px !important;              /* NO aumentar altura */
+  width:clamp(78px, 10vw, 130px) !important;   /* ancho automático */
+  flex: 1 0 clamp(78px, 10vw, 130px) !important; /* permite repartir espacio */
+}
+
+/* En pantallas pequeñas, prioriza que sigan siendo anchos sin hacerse altos */
+@media (max-width: 720px){
+  .hab{
+    width:clamp(92px, 28vw, 160px) !important;
+    flex: 1 0 clamp(92px, 28vw, 160px) !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -936,6 +1044,15 @@
 <!-- MODAL FIJO · AVANCE DE PULIDOS -->
 <div class="avance-modal" id="avanceModal">
   <h3>Avance de Pulidos</h3>
+
+  <!-- VUELTAS / LIBRO -->
+  <div class="vuelta-strip" id="vueltaStrip">
+    <!-- botones dinámicos -->
+    <div class="vuelta-add">
+      <span class="vuelta-hint" id="vueltaHint">Libro: Vuelta</span>
+      <button type="button" id="btnNuevaVuelta">+ Nueva</button>
+    </div>
+  </div>
 
   <div class="av-item" data-scope="general">
     <div class="av-row"><span class="av-label">General</span><span class="av-pct" id="pctGeneral">0%</span></div>
@@ -1616,6 +1733,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   const SUPABASE_ANON_KEY = 'sb_publishable_vxdLQ3U83cyKDWkJ9zjV0A_29vS4IGa';
   const HOTEL_NAME = 'Krystal Grand Los Cabos';
 
+
+  // === VUELTAS (LIBRO) ===
+  // Opción quirúrgica: separa cada vuelta usando el campo "hotel" como namespace:
+  //   "Krystal Grand Los Cabos · Vuelta 1", "… · Vuelta 2", etc.
+  // No requiere cambios en Supabase ni altera la lógica existente.
+  const STORAGE_VUELTAS = 'pulidos_vueltas_v1';
+  const STORAGE_VUELTA_ACTIVA = 'pulidos_vuelta_activa_v1';
+
+  const getVueltas = () => {
+    try{
+      const v = JSON.parse(localStorage.getItem(STORAGE_VUELTAS) || '[]');
+      return Array.isArray(v) && v.length ? v : ['Vuelta 1','Vuelta 2'];
+    } catch(e){
+      return ['Vuelta 1','Vuelta 2'];
+    }
+  };
+
+  const setVueltas = (arr) => localStorage.setItem(STORAGE_VUELTAS, JSON.stringify(arr));
+
+  let VUELTAS = getVueltas();
+  let VUELTA_ACTIVA = (localStorage.getItem(STORAGE_VUELTA_ACTIVA) || VUELTAS[0] || 'Vuelta 1');
+
+  const hotelKey = () => (String(VUELTA_ACTIVA).trim() === 'Vuelta 1' ? HOTEL_NAME : `${HOTEL_NAME} · ${VUELTA_ACTIVA}`);
+
+  // Keys de almacenamiento local por vuelta (para no mezclar historiales)
+  const keyState = () => `${STORAGE_STATE}::${hotelKey()}`;
+  const keyLog = () => `${STORAGE_LOG}::${hotelKey()}`;
+
   const supabase = (window.supabase && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY !== 'PEGA_AQUI_TU_ANON_KEY')
     ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null;
@@ -1661,13 +1806,137 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   const saveJSON = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
-  const state = loadJSON(STORAGE_STATE, { rooms: {} });
-  const log = loadJSON(STORAGE_LOG, []);
+  let state = loadJSON(keyState(), { rooms: {} });
+  let log = loadJSON(keyLog(), []);
+
+  const resetLocalForActiveVuelta = () => {
+    state = { rooms: {} };
+    log = [];
+    saveJSON(keyState(), state);
+    saveJSON(keyLog(), log);
+  };
+
+  const buildVueltaTabs = () => {
+    const strip = document.getElementById('vueltaStrip');
+    if(!strip) return;
+
+    // Limpia botones previos (pero respeta el bloque "vuelta-add")
+    const addBlock = strip.querySelector('.vuelta-add');
+    strip.querySelectorAll('button.vuelta-btn').forEach(b => b.remove());
+
+    // Inserta botones antes del addBlock
+    const frag = document.createDocumentFragment();
+    VUELTAS.forEach(name => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'vuelta-btn' + (name === VUELTA_ACTIVA ? ' active' : '');
+      b.textContent = name;
+      b.addEventListener('click', async () => {
+        if(name === VUELTA_ACTIVA) return;
+        VUELTA_ACTIVA = name;
+        localStorage.setItem(STORAGE_VUELTA_ACTIVA, VUELTA_ACTIVA);
+
+        // Recarga "libro"
+        resetLocalForActiveVuelta();
+        await cloudLoadEstado();
+        applyStateToDOM();
+        if(typeof updateAvances === 'function') updateAvances();
+        buildVueltaTabs();
+      });
+      frag.appendChild(b);
+    });
+
+    if(addBlock){
+      strip.insertBefore(frag, addBlock);
+    } else {
+      strip.appendChild(frag);
+    }
+
+    const hint = document.getElementById('vueltaHint');
+    if(hint) hint.textContent = `Libro: ${VUELTA_ACTIVA}`;
+  };
+
+  const ensureVueltaUI = () => {
+    // Asegura valores válidos
+    if(!VUELTAS.includes(VUELTA_ACTIVA)){
+      VUELTA_ACTIVA = VUELTAS[0] || 'Vuelta 1';
+      localStorage.setItem(STORAGE_VUELTA_ACTIVA, VUELTA_ACTIVA);
+    }
+
+
+    // AUTO-INICIALIZAR VUELTA 2 (porque tu Vuelta 1 ya existe en la nube)
+    // Si entras a Vuelta 2 por primera vez y está vacía, clonamos la fecha previa desde Vuelta 1 y marcamos 'reset'.
+    (async () => {
+      try{
+        if(VUELTA_ACTIVA !== 'Vuelta 1' && supabase){
+          const tiene = await cloudVueltaTieneDatos(VUELTA_ACTIVA);
+          if(!tiene){
+            const fuente = 'Vuelta 1';
+            showToast('info','Preparando vuelta', `📘 ${VUELTA_ACTIVA} está vacía. Copiando fechas de ${fuente} y reiniciando…`, 3600);
+            const r = await cloudCloneVuelta(fuente, VUELTA_ACTIVA);
+            if(r && r.ok){
+              resetLocalForActiveVuelta();
+              await cloudLoadEstado();
+              applyStateToDOM();
+              if(typeof updateAvances === 'function') updateAvances();
+              showToast('ok','Listo', `✅ ${VUELTA_ACTIVA} reiniciada (ROJO) conservando fechas previas.`, 3800);
+            }
+          }
+        }
+      } catch(e){ /* silencioso */ }
+    })();
+
+    const btnNueva = document.getElementById('btnNuevaVuelta');
+    if(btnNueva){
+      btnNueva.addEventListener('click', async () => {
+        const nextNum = (() => {
+          // si existen "Vuelta N", calcula siguiente
+          const nums = VUELTAS.map(v => (String(v).match(/(\d+)/) || [])[1]).filter(Boolean).map(n=>parseInt(n,10)).filter(n=>Number.isFinite(n));
+          const maxN = nums.length ? Math.max(...nums) : VUELTAS.length;
+          return maxN + 1;
+        })();
+
+        const nueva = `Vuelta ${nextNum}`;
+        VUELTAS.push(nueva);
+        setVueltas(VUELTAS);
+
+        VUELTA_ACTIVA = nueva;
+        localStorage.setItem(STORAGE_VUELTA_ACTIVA, VUELTA_ACTIVA);
+
+        // Nuevo libro: se reinicia visualmente (ROJO) pero se conserva la última fecha previa en tooltip
+        const fuente = VUELTAS[VUELTAS.length - 2] || 'Vuelta 1';
+
+        resetLocalForActiveVuelta();
+        applyStateToDOM();
+        if(typeof updateAvances === 'function') updateAvances();
+        buildVueltaTabs();
+
+        // Si hay nube, clonamos automáticamente la vuelta anterior hacia la nueva como 'reset'
+        if(supabase){
+          showToast('info','Inicializando', `📚 Preparando ${nueva} a partir de ${fuente}…`, 2600);
+          const r = await cloudCloneVuelta(fuente, nueva);
+          if(r && r.ok){
+            await cloudLoadEstado();
+            applyStateToDOM();
+            if(typeof updateAvances === 'function') updateAvances();
+            showToast('ok','Vuelta lista', `✅ ${nueva} creada. Habitaciones reiniciadas (ROJO) conservando fechas previas.`, 3200);
+          } else {
+            showToast('warn','Atención', `⚠️ ${nueva} creada, pero no pude clonar fechas previas automáticamente. (Se puede reintentar al volver a seleccionar la vuelta).`, 4200);
+          }
+        } else {
+          showToast('ok','Nueva vuelta', `📘 Creada ${nueva}. (Conecta nube para clonar fechas previas automáticamente)`, 3500);
+        }
+
+      });
+    }
+
+    buildVueltaTabs();
+  };
 
   function logAction(entry){
     log.unshift(entry);
     if(log.length > 600) log.length = 600;
-    saveJSON(STORAGE_LOG, log);
+    saveJSON(keyLog(), log);
   }
 
   // === Supabase helpers (cloud) ===
@@ -1753,7 +2022,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data, error } = await supabase
       .from(DB.estado)
       .select('*')
-      .eq(DB.cHotel, HOTEL_NAME);
+      .eq(DB.cHotel, hotelKey());
 
     if(error){
       console.warn('Supabase load error:', error);
@@ -1775,6 +2044,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         state.rooms[room].in_process_date = done || todayISO();
         state.rooms[room].in_process_resp = responsable;
         state.rooms[room].in_process_comment = comentarios;
+      } else if(status === 'reset'){
+        state.rooms[room].status = 'reset';
+        state.rooms[room].history = Array.isArray(state.rooms[room].history) ? state.rooms[room].history : [];
+        if(done && !state.rooms[room].history.includes(done)) state.rooms[room].history.push(done);
       } else if(status === 'completada'){
         state.rooms[room].status = 'completada';
         state.rooms[room].history = Array.isArray(state.rooms[room].history) ? state.rooms[room].history : [];
@@ -1784,8 +2057,76 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    saveJSON(STORAGE_STATE, state);
+    saveJSON(keyState(), state);
     return true;
+  }
+
+
+  // === CLONAR VUELTA (conserva fechas previas pero reinicia estatus visual) ===
+  async function cloudCloneVuelta(fromVueltaName, toVueltaName){
+    if(!supabase) return { ok:false, reason:'no_supabase' };
+
+    const fromHotel = (String(fromVueltaName).trim() === 'Vuelta 1') ? HOTEL_NAME : `${HOTEL_NAME} · ${fromVueltaName}`;
+    const toHotel   = (String(toVueltaName).trim() === 'Vuelta 1') ? HOTEL_NAME : `${HOTEL_NAME} · ${toVueltaName}`;
+
+    // Trae filas de la vuelta base
+    const { data, error } = await supabase
+      .from(DB.estado)
+      .select('*')
+      .eq(DB.cHotel, fromHotel);
+
+    if(error){
+      console.warn('Clone load error:', error);
+      return { ok:false, reason:'load_error', error };
+    }
+
+    const rows = (data || [])
+      .map(r => {
+        const room = String(r[DB.cRoom] ?? '').trim();
+        if(!room) return null;
+        const done = r[DB.cDoneDate] ? String(r[DB.cDoneDate]) : null;
+        const resp = r[DB.cResp] ? String(r[DB.cResp]) : '';
+        const com  = r[DB.cComment] ? String(r[DB.cComment]) : '';
+        // IMPORTANTE:
+        // - Conserva la fecha anterior en done_date para tooltip/historial
+        // - Pero marca 'reset' para que se vea ROJO hasta que se haga de nuevo en esta vuelta
+        return {
+          [DB.cHotel]: toHotel,
+          [DB.cRoom]: room,
+          [DB.cStatus]: 'reset',
+          [DB.cDoneDate]: done,
+          [DB.cResp]: resp,
+          [DB.cComment]: com,
+          [DB.cUpdatedAt]: new Date().toISOString()
+        };
+      })
+      .filter(Boolean);
+
+    if(!rows.length) return { ok:true, inserted:0 };
+
+    // Upsert por hotel+habitacion (mismo conflicto que ya usas)
+    const { error: upErr } = await supabase
+      .from(DB.estado)
+      .upsert(rows, { onConflict: `${DB.cHotel},${DB.cRoom}` });
+
+    if(upErr){
+      console.warn('Clone upsert error:', upErr);
+      return { ok:false, reason:'upsert_error', error: upErr };
+    }
+
+    return { ok:true, inserted: rows.length };
+  }
+
+  async function cloudVueltaTieneDatos(vueltaName){
+    if(!supabase) return false;
+    const h = (String(vueltaName).trim() === 'Vuelta 1') ? HOTEL_NAME : `${HOTEL_NAME} · ${vueltaName}`;
+    const { data, error } = await supabase
+      .from(DB.estado)
+      .select(DB.cRoom, { count:'exact', head:false })
+      .eq(DB.cHotel, h)
+      .limit(1);
+    if(error) return false;
+    return Array.isArray(data) && data.length > 0;
   }
 
   async function cloudUpsertEstado(payload){
@@ -1801,7 +2142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { error } = await supabase
       .from(DB.estado)
       .delete()
-      .eq(DB.cHotel, HOTEL_NAME)
+      .eq(DB.cHotel, hotelKey())
       .eq(DB.cRoom, room);
     return error ? { ok:false, error } : { ok:true };
   }
@@ -1820,7 +2161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const { data, error } = await supabase
       .from(DB.log)
       .select('*')
-      .eq(DB.cHotel, HOTEL_NAME)
+      .eq(DB.cHotel, hotelKey())
       .eq(DB.cRoom, room)
       .order(DB.cCreatedAt, { ascending:false })
       .limit(50);
@@ -1865,6 +2206,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    if(info && info.status === 'reset'){
+      const lastISO = getLastCompletedISO(room);
+      if(!lastISO){
+        habEl.title = 'Vuelta reiniciada · Pendiente · Sin registros previos';
+        return;
+      }
+      const lastD = toDate(lastISO);
+      if(!lastD){
+        habEl.title = `Vuelta reiniciada · Último pulido anterior: ${fmt(lastISO)}`;
+        return;
+      }
+      const next = addDays(lastD, DAYS_BETWEEN_PULIDOS);
+      const nextISO = `${next.getFullYear()}-${String(next.getMonth()+1).padStart(2,'0')}-${String(next.getDate()).padStart(2,'0')}`;
+      habEl.title = `Vuelta reiniciada · Último pulido anterior: ${fmt(lastISO)} · Próximo sugerido: ${fmt(nextISO)}`;
+      return;
+    }
+
     const lastISO = getLastCompletedISO(room);
     if(!lastISO){
       habEl.title = 'Pendiente · Sin registros';
@@ -1891,62 +2249,52 @@ document.addEventListener('DOMContentLoaded', async () => {
   function applyStateToDOM(){
     document.querySelectorAll('.hab').forEach(h => {
       const room = h.dataset.room;
+      // Limpia clases de estado
       h.classList.remove('pulida','en-proceso','no-pulida','por-vencer','al-dia');
 
       const info = room ? state.rooms[room] : null;
 
-      // 1) Sin registro => rojo
+      // REGLA NUEVA (sin cuenta regresiva):
+      // - Rojo: aún no intervenida en ESTA vuelta (sin registro o status reset)
+      // - Amarillo: en proceso (manual)
+      // - Verde: ya intervenida (completada) en esta vuelta
       if(!info){
-        h.classList.add('no-pulida');
+        h.classList.add('no-pulida'); // rojo
         setTooltip(h);
         return;
       }
 
-      // 2) En proceso (manual) => amarillo con pulso
       if(info.status === 'en_proceso'){
-        h.classList.add('en-proceso');
+        h.classList.add('en-proceso'); // amarillo (pulso)
         setTooltip(h);
         return;
       }
 
-      // 3) Completada: decide color por tiempo (2 por año)
+      if(info.status === 'reset'){
+        h.classList.add('no-pulida'); // rojo (conserva fechas para tooltip)
+        setTooltip(h);
+        return;
+      }
+
+      // Si tiene alguna evidencia de completado en esta vuelta => verde
+      // (status completada o done_date presente)
       const lastISO = getLastCompletedISO(room);
-      if(!lastISO){
-        h.classList.add('no-pulida');
-        setTooltip(h);
-        return;
-      }
-
-      const lastD = toDate(lastISO);
-      if(!lastD){
-        // Si la fecha está rara, la damos por 'al día' para no bloquear operación
-        h.classList.add('pulida','al-dia');
-        setTooltip(h);
-        return;
-      }
-
-      const next = addDays(lastD, DAYS_BETWEEN_PULIDOS);
-      const daysLeft = diffDays(next, new Date());
-
-      if(daysLeft < 0){
-        // Vencida => rojo (no cuenta como pulida vigente)
-        h.classList.add('no-pulida');
-      } else if(daysLeft <= 30){
-        // Por vencer => amarillo sin pulso (sí cuenta como al día)
-        h.classList.add('por-vencer','al-dia');
+      if(info.status === 'completada' || lastISO){
+        h.classList.add('pulida','al-dia'); // verde
       } else {
-        // Vigente => verde (al día)
-        h.classList.add('pulida','al-dia');
+        h.classList.add('no-pulida'); // rojo
       }
 
       setTooltip(h);
     });
 
-    saveJSON(STORAGE_STATE, state);
+    saveJSON(keyState(), state);
     if(typeof updateAvances === 'function') updateAvances();
   }
 
+
   ensureDataAttributes();
+  ensureVueltaUI();
   mountCloudWidget();
 
   // Conecta a nube (opcional). Si no hay sesión, funciona local hasta que inicies sesión.
@@ -2290,7 +2638,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const now = new Date().toISOString();
         const dbStatus = (status === 'en_proceso') ? 'en_proceso' : 'completada';
         const payload = {
-          [DB.cHotel]: HOTEL_NAME,
+          [DB.cHotel]: hotelKey(),
           [DB.cRoom]: String(room),
           [DB.cStatus]: dbStatus,
           [DB.cDoneDate]: dateISO || null,
@@ -2312,7 +2660,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           alert('⚠️ No se pudo guardar en nube (estado): ' + up.error.message);
         } else {
           const lp = await cloudInsertLog({
-            [DB.cHotel]: HOTEL_NAME,
+            [DB.cHotel]: hotelKey(),
             [DB.cRoom]: String(room),
             [DB.cAction]: prev ? 'actualizar' : 'crear',
             [DB.cOld]: oldData,
@@ -2351,7 +2699,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           alert('⚠️ No se pudo borrar en nube (estado): ' + del.error.message);
         } else {
           const lp = await cloudInsertLog({
-            [DB.cHotel]: HOTEL_NAME,
+            [DB.cHotel]: hotelKey(),
             [DB.cRoom]: String(room),
             [DB.cAction]: 'eliminar',
             [DB.cOld]: prev,
