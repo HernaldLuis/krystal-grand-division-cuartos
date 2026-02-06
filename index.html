@@ -1025,9 +1025,132 @@
   }
 }
 
+
+/* ===== KG MODALS (Welcome + Auth) – aislado, no rompe estilos existentes ===== */
+.kg-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:99999}
+.kg-modal[aria-hidden="false"]{display:flex}
+.kg-modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.62)}
+.kg-modal__dialog{
+  position:relative;
+  width:min(720px,92vw);
+  max-height:86vh;
+  overflow:auto;
+  background:rgba(17,28,38,.98);
+  border:1px solid var(--border-soft);
+  border-radius:16px;
+  padding:18px 18px 14px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+}
+.kg-modal__dialog h2{margin:4px 0 10px;font-size:20px}
+.kg-modal__dialog h3{margin:14px 0 8px;font-size:16px;opacity:.95}
+.kg-modal__dialog p, .kg-modal__dialog li{line-height:1.35;opacity:.95}
+.kg-modal__dialog ul{padding-left:18px;margin:8px 0}
+.kg-modal__footer{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
+.kg-check{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;opacity:.95}
+.kg-check input{transform:scale(1.1)}
+.kg-btn{
+  background:rgba(255,255,255,.08);
+  color:var(--txt);
+  border:1px solid rgba(255,255,255,.14);
+  padding:10px 14px;
+  border-radius:12px;
+  cursor:pointer;
+}
+.kg-btn:hover{background:rgba(255,255,255,.12)}
+.kg-btn--primary{background:#1fb6d1;border-color:rgba(0,0,0,.2);color:#001018;font-weight:700}
+.kg-btn--primary:hover{filter:brightness(1.05)}
+.kg-btn--ghost{padding:8px 10px;border-radius:10px}
+
+.kg-welcome__note{background:rgba(255,255,255,.06);padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.10)}
+.kg-auth__hint{margin-top:0;opacity:.9}
+.kg-field{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.kg-field label{font-size:13px;opacity:.95}
+.kg-field input{
+  background:rgba(255,255,255,.06);
+  color:var(--txt);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:12px;
+  padding:10px 12px;
+  outline:none;
+}
+.kg-field input:focus{border-color:rgba(31,182,209,.75);box-shadow:0 0 0 3px rgba(31,182,209,.18)}
+.kg-passwrap{display:flex;gap:8px;align-items:center}
+.kg-passwrap input{flex:1}
+
 </style>
 </head>
 <body>
+
+<!-- ===== MODAL DE BIENVENIDA (Pulidos) ===== -->
+<div id="kgWelcomeModal" class="kg-modal kg-modal--welcome" aria-hidden="true">
+  <div class="kg-modal__backdrop" data-kg-close="welcome"></div>
+  <div class="kg-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="kgWelcomeTitle">
+    <h2 id="kgWelcomeTitle">🛠️ Bienvenido al Formato de Control de Pulidos</h2>
+
+    <p>
+      Este formato ha sido diseñado para mejorar, dar seguimiento y transparentar
+      el proceso de pulido de habitaciones de manera clara, ordenada y en tiempo real.
+    </p>
+
+    <h3>¿Qué mejoras integra este formato?</h3>
+    <ul>
+      <li>🔄 Seguimiento en tiempo real del pulido con estatus y responsable.</li>
+      <li>🗓️ Bitácora histórica de fechas para trazabilidad operativa.</li>
+      <li>♻️ Sistema de “Vueltas” para conservar procesos anteriores sin sobreescribir.</li>
+      <li>🚦 Método de semáforo para visualizar el avance real del catálogo.</li>
+    </ul>
+
+    <h3>🔐 Acceso a la información</h3>
+    <p>
+      Para consultar toda la información detallada es necesario identificarse y estar
+      conectado a la nube. En caso de no contar con credenciales, contacta a tu administrador.
+    </p>
+
+    <p class="kg-welcome__note">
+      💬 Recuerda: tu opinión ayuda a mejorar este espacio.<br>
+      <strong>A por ellos, hagámoslo posible.</strong>
+    </p>
+
+    <div class="kg-modal__footer">
+      <label class="kg-check">
+        <input type="checkbox" id="kgWelcomeDontShow">
+        <span>No volver a mostrar</span>
+      </label>
+
+      <button id="kgWelcomeAccept" class="kg-btn kg-btn--primary" type="button">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DE IDENTIFICACIÓN (Supabase Auth) ===== -->
+<div id="kgAuthModal" class="kg-modal kg-modal--auth" aria-hidden="true">
+  <div class="kg-modal__backdrop" data-kg-close="auth"></div>
+  <div class="kg-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="kgAuthTitle">
+    <h2 id="kgAuthTitle">🔐 Identificación</h2>
+
+    <p class="kg-auth__hint">Acceso para conectar a la nube (Supabase Auth).</p>
+
+    <div class="kg-field">
+      <label for="kgAuthEmail">Correo</label>
+      <input id="kgAuthEmail" type="email" autocomplete="username" placeholder="correo@dominio.com">
+    </div>
+
+    <div class="kg-field">
+      <label for="kgAuthPass">Contraseña</label>
+      <div class="kg-passwrap">
+        <input id="kgAuthPass" type="password" autocomplete="current-password" placeholder="••••••••">
+        <button id="kgAuthToggle" type="button" class="kg-btn kg-btn--ghost" aria-label="Mostrar u ocultar contraseña">👁️</button>
+      </div>
+    </div>
+
+    <div class="kg-modal__footer">
+      <button id="kgAuthCancel" class="kg-btn" type="button">Cancelar</button>
+      <button id="kgAuthOk" class="kg-btn kg-btn--primary" type="button">Conectar</button>
+    </div>
+  </div>
+</div>
+
+
 
 <header class="topbar">
   <div class="brand">
@@ -1707,6 +1830,153 @@ Pisos 41 al 47 (equivalentes a 1–7)</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
+
+  /* ===========================
+     KG · Modal de Bienvenida
+     - Se muestra SIEMPRE al abrir, excepto si marcaron "No volver a mostrar"
+     - Si cambias la versión, rompe el "No volver a mostrar" y se vuelve a mostrar
+  =========================== */
+  const KG_WELCOME_VERSION = "1.0.0";
+  const KG_WELCOME_HIDE_KEY = "kg_hide_welcome";
+  const KG_WELCOME_VER_KEY  = "kg_welcome_version";
+
+  const kgWelcomeModal = document.getElementById("kgWelcomeModal");
+  const kgWelcomeAccept = document.getElementById("kgWelcomeAccept");
+  const kgWelcomeDontShow = document.getElementById("kgWelcomeDontShow");
+
+  const kgSetWelcomeVisible = (visible) => {
+    if(!kgWelcomeModal) return;
+    kgWelcomeModal.setAttribute("aria-hidden", visible ? "false" : "true");
+  };
+
+  try{
+    const last = localStorage.getItem(KG_WELCOME_VER_KEY);
+    if(last !== KG_WELCOME_VERSION){
+      localStorage.setItem(KG_WELCOME_VER_KEY, KG_WELCOME_VERSION);
+      localStorage.setItem(KG_WELCOME_HIDE_KEY, "false"); // rompe el "no volver"
+    }
+    const hide = localStorage.getItem(KG_WELCOME_HIDE_KEY) === "true";
+    kgSetWelcomeVisible(!hide);
+  }catch(e){
+    // si localStorage falla por política del navegador, simplemente lo mostramos
+    kgSetWelcomeVisible(true);
+  }
+
+  if(kgWelcomeAccept){
+    kgWelcomeAccept.addEventListener("click", () => {
+      try{
+        if(kgWelcomeDontShow?.checked){
+          localStorage.setItem(KG_WELCOME_HIDE_KEY, "true");
+        }else{
+          localStorage.setItem(KG_WELCOME_HIDE_KEY, "false");
+        }
+      }catch(e){}
+      kgSetWelcomeVisible(false);
+    });
+  }
+  // cerrar welcome con click fuera (no rompe nada)
+  document.addEventListener("click", (ev) => {
+    const t = ev.target;
+    if(t && t.getAttribute && t.getAttribute("data-kg-close")==="welcome"){
+      kgSetWelcomeVisible(false);
+    }
+  });
+
+  /* ===========================
+     KG · Modal de Identificación (Supabase Auth)
+     - SOLO aparece cuando el usuario da "Conectar"
+     - Reemplaza prompts sin tocar la lógica de Supabase
+     - Incluye fallback a prompt si el modal no existe por cualquier razón
+  =========================== */
+  const kgAuthModal = document.getElementById("kgAuthModal");
+  const kgAuthEmail = document.getElementById("kgAuthEmail");
+  const kgAuthPass  = document.getElementById("kgAuthPass");
+  const kgAuthOk    = document.getElementById("kgAuthOk");
+  const kgAuthCancel= document.getElementById("kgAuthCancel");
+  const kgAuthToggle= document.getElementById("kgAuthToggle");
+
+  const kgSetAuthVisible = (visible) => {
+    if(!kgAuthModal) return;
+    kgAuthModal.setAttribute("aria-hidden", visible ? "false" : "true");
+  };
+
+  if(kgAuthToggle && kgAuthPass){
+    kgAuthToggle.addEventListener("click", () => {
+      kgAuthPass.type = (kgAuthPass.type === "password") ? "text" : "password";
+    });
+  }
+
+  function openCloudAuthModal(){
+    return new Promise((resolve) => {
+      // Fallback seguro para no dejar tirada la operación si algo falla
+      if(!kgAuthModal || !kgAuthEmail || !kgAuthPass || !kgAuthOk || !kgAuthCancel){
+        const email = prompt('Correo (Supabase Auth):');
+        if(!email) return resolve(null);
+        const password = prompt('Contraseña:');
+        if(!password) return resolve(null);
+        return resolve({ email, password });
+      }
+
+      // reset campos
+      kgAuthEmail.value = "";
+      kgAuthPass.value = "";
+      kgAuthPass.type = "password";
+
+      const cleanup = () => {
+        kgSetAuthVisible(false);
+        document.removeEventListener("keydown", onKey);
+      };
+
+      const onKey = (e) => {
+        if(e.key === "Escape"){
+          cleanup();
+          resolve(null);
+        }
+        if(e.key === "Enter"){
+          // Enter confirma si el modal está abierto
+          if(kgAuthModal.getAttribute("aria-hidden") === "false"){
+            kgAuthOk.click();
+          }
+        }
+      };
+
+      document.addEventListener("keydown", onKey);
+
+      // click fuera
+      const outsideClick = (ev) => {
+        const t = ev.target;
+        if(t && t.getAttribute && t.getAttribute("data-kg-close")==="auth"){
+          document.removeEventListener("click", outsideClick);
+          cleanup();
+          resolve(null);
+        }
+      };
+      document.addEventListener("click", outsideClick);
+
+      kgAuthCancel.onclick = () => {
+        document.removeEventListener("click", outsideClick);
+        cleanup();
+        resolve(null);
+      };
+
+      kgAuthOk.onclick = () => {
+        const email = String(kgAuthEmail.value || "").trim();
+        const password = String(kgAuthPass.value || "");
+        if(!email || !password){
+          alert("Por favor ingresa correo y contraseña.");
+          return;
+        }
+        document.removeEventListener("click", outsideClick);
+        cleanup();
+        resolve({ email, password });
+      };
+
+      kgSetAuthVisible(true);
+      setTimeout(() => kgAuthEmail.focus(), 50);
+    });
+  }
+
+
   document.querySelectorAll('.torre').forEach(torre => {
     let k = 0, m = 0;
     torre.querySelectorAll('.hab .tipo').forEach(t => {
@@ -1998,10 +2268,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = await cloudGetUser();
     if(user) return user;
 
-    const email = prompt('Correo (Supabase Auth):');
-    if(!email) return null;
-    const password = prompt('Contraseña:');
-    if(!password) return null;
+    const creds = await openCloudAuthModal();
+    if(!creds) return null;
+    const { email, password } = creds;
 
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if(error){
