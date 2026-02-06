@@ -3242,5 +3242,39 @@ setInterval(updateDateTime, 1000);
 updateDateTime();
 </script>
 
+
+<script>
+/* === KG Friendly Name Overlay (non-invasive) === */
+(function(){
+  const KG_USER_MAP = {
+    "luis_hernaldo_21@outlook.com": "Luis Hernald",
+    "amadellaves.kglc@krystal-hotels.com": "Ulises Sosa"
+  };
+
+  function friendly(email){
+    if(!email) return null;
+    const key = email.toLowerCase().trim();
+    return KG_USER_MAP[key] || null;
+  }
+
+  function apply(){
+    const statusEl = document.querySelector(".cloud-widget .meta .status");
+    if(!statusEl) return;
+    const txt = statusEl.textContent || "";
+    const m = txt.match(/[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}/);
+    if(!m) return;
+    const email = m[0];
+    const name = friendly(email);
+    if(name){
+      statusEl.textContent = `Bienvenido ${name}`;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", apply);
+  const obs = new MutationObserver(apply);
+  obs.observe(document.body, {subtree:true, childList:true, characterData:true});
+})();
+</script>
+
 </body>
 </html>
